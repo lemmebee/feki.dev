@@ -1,0 +1,36 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'whoami'
+theme = 'hugo-theme-anubis2'
+defaultContentLanguage = "en"
+
+[params.author]
+name = "Ehab ELFEKI"
+email  = "ehabsfeki@gmail.com"
+location = "Lyon"
+
+[params.anubis2]
+enableMathGlobally = true # MathJax (default is false)
+enableCopyCodeButton = true
+enableReadMoreButton = true
+hideFooterAttribution = true # hide "Powered by Hugo, theme" in footer
+colorTheme = "auto"
+enableColorThemeSwitcher = true
+
+# police = "京公网安备 12345678号" # for China ICP police beian
+# icp = "京ICP备xxxxx号-1" # for China ICP license
+
+social = [
+    { id = "github", url = "https://github.com/lemmebee" },
+    { id = "linkedin", url = "https://www.linkedin.com/in/ehab-elfeki-137025148/" },
+    { id = "email", url = "ehabsfeki@gmail.com" },
+]
+
+######
+[params]
+description = "Anubis2 is another simple minimalist theme for Hugo blog engine."
+dateFormat = "2006-01-02"
+paginationSinglePost = true
+
+readNextPosts = 2
+disqusShortname = ""

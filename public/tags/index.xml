@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on whoami</title>
+    <link>/tags/</link>
+    <description>whoami (Tags)</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+      
+        <managingEditor>ehabsfeki@gmail.com
+          
+            (Ehab ELFEKI)
+          
+        </managingEditor>
+      
+
+      
+    
+
+    
+    
+    <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>

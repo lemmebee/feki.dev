@@ -1,0 +1,164 @@
+@import 'subfolder/hello.scss';
+
+.container {
+    max-width: 42em;
+    margin: 0 auto;
+    padding: 1.5em 2em;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-left: 3px solid #50fa7b;
+    position: relative;
+    transition: all 0.3s ease;
+    
+    /* Terminal-inspired header strip */
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #ff79c6, #bd93f9, #8be9fd);
+        border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
+    }
+    
+    /* Terminal window header */
+    &::after {
+        content: '';
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        height: 12px;
+        width: 40px;
+        background: linear-gradient(90deg, 
+            #ff5f56 0%, #ff5f56 30%, 
+            #ffbd2e 30%, #ffbd2e 60%, 
+            #27c93f 60%, #27c93f 100%);
+        border-radius: 6px;
+    }
+    
+    /* Add some subtle terminal-like styling */
+    h1, h2, h3, h4, h5, h6 {
+        color: #300a24;
+        font-family: 'Ubuntu Mono', 'Courier New', monospace;
+        border-bottom: 1px dashed #bd93f9;
+        padding-bottom: 0.4rem;
+        position: relative;
+        
+        &::before {
+            content: "$";
+            color: #ff79c6;
+            position: absolute;
+            left: -1em;
+            opacity: 0.7;
+            font-weight: normal;
+        }
+    }
+    
+    /* Post styling */
+    .post {
+        margin-bottom: 2em;
+        position: relative;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: rgba(80, 250, 123, 0.5);
+        }
+    }
+    
+    /* Code blocks styling to match terminal */
+    pre, code {
+        background-color: #300a24;
+        color: #f8f8f2;
+        border-radius: 4px;
+        font-family: 'Ubuntu Mono', 'Courier New', monospace;
+    }
+    
+    /* Links styling with terminal-inspired colors */
+    a {
+        color: #bd93f9;
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            color: #ff79c6;
+            border-bottom: 1px solid #ff79c6;
+        }
+    }
+    
+    /* Terminal-inspired blockquote */
+    blockquote {
+        border-left: 3px solid #ff79c6;
+        background-color: rgba(80, 250, 123, 0.05);
+        padding: 0.8rem 1rem;
+        margin: 1.2rem 0;
+        font-style: italic;
+    }
+    
+    /* Hover effect */
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Add some spacing between blog posts */
+.articles .post {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px dashed #bd93f9;
+    
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Style for post metadata to match terminal theme */
+.post-meta {
+    font-family: 'Ubuntu Mono', 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #6272a4;
+    
+    .post-date {
+        &::before {
+            content: "$ date: ";
+            color: #ff79c6;
+        }
+    }
+    
+    .post-author {
+        &::before {
+            content: "$ author: ";
+            color: #ff79c6;
+        }
+    }
+}
+
+/* Style for "Read more" button to match terminal */
+.read-more {
+    display: inline-block;
+    background-color: #300a24;
+    color: #50fa7b;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: 'Ubuntu Mono', 'Courier New', monospace;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
+    
+    &::before {
+        content: "$ ";
+        color: #ff79c6;
+    }
+    
+    &:hover {
+        background-color: #3c0e38;
+        transform: translateX(5px);
+    }
+}
