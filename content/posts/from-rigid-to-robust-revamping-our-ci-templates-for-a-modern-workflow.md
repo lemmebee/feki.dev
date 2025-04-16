@@ -1,6 +1,7 @@
 +++
 date = '2025-04-03T22:30:56+02:00'
 draft = false
+tags: ["CI/CD", "DevOps", "Automation"]
 title = 'From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow'
 +++
 **tl;dr:** Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.
