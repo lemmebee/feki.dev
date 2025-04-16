@@ -1,12 +1,20 @@
 +++
 date = '2025-04-03T22:30:56+02:00'
 draft = false
-tags: ["CI/CD", "DevOps", "Automation"]
 title = 'From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow'
 +++
 **tl;dr:** Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.
 
 ---
+## Table of contents
+- [The Challenge: When Templates Become Obstacles](#the-challenge-when-templates-become-obstacles)
+- [The Transformation: Introducing a Modular, Language-Agnostic Architecture](#the-transformation-introducing-a-modular-language-agnostic-architecture)
+ - [1. Modular Design with `include`](#1-modular-design-with-include)
+ - [2. Language-Agnostic Approach & Smart Detection](#2-language-agnostic-approach--smart-detection)
+ - [3. Unified Pipeline Stages](#3-unified-pipeline-stages)
+ - [4. Advanced CI/CD Capabilities](#4-advanced-cicd-capabilities)
+- [The Benefits: A More Efficient and Secure Future](#the-benefits-a-more-efficient-and-secure-future)
+- [Conclusion](#conclusion)
 
 Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.
 

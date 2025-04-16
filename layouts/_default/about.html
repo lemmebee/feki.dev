@@ -1,0 +1,274 @@
+{{ define "main" }}
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: monospace;
+    margin: 0;
+    padding: 0;
+  }
+  
+  
+  
+  .terminal {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: #000;
+    overflow: hidden;
+  }
+  
+  .terminal-header {
+    background-color: #000;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #222;
+  }
+  
+  .terminal-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+  }
+  
+  .terminal-home-link {
+    color: #e06c75;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  
+  .terminal-home-link:hover {
+    text-decoration: underline;
+  }
+  
+  .terminal-title {
+    color: #aaa;
+    flex-grow: 1;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .terminal-body {
+    padding: 25px;
+    font-size: 15px;
+  }
+  
+  .command-block {
+    margin-bottom: 25px;
+  }
+  
+  .prompt {
+    color: #98c379;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .prompt::before {
+    content: "❯";
+    margin-right: 10px;
+    color: #c678dd;
+    font-weight: bold;
+  }
+  
+  .command {
+    color: #61afef;
+    font-weight: 600;
+  }
+  
+  .output {
+    color: #e5c07b;
+    padding-left: 25px;
+    white-space: pre-wrap;
+    margin-top: 8px;
+    position: relative;
+  }
+  
+  .output.skill-list {
+    color: #abb2bf;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 5px;
+  }
+  
+  .skill-item {
+    position: relative;
+    padding-left: 15px;
+    transition: transform 0.2s, color 0.2s;
+  }
+  
+  .skill-item:hover {
+    color: #c678dd;
+    transform: translateX(5px);
+  }
+  
+  .skill-item::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    color: #e06c75;
+  }
+  
+  .about-text {
+    padding-left: 25px;
+    margin-top: 8px;
+    line-height: 1.8;
+  }
+  
+  .category {
+    color: #e06c75;
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 1px;
+  }
+  
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 18px;
+    background-color: #98c379;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+  }
+  
+  @keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  @media (max-width: 768px) {
+    .terminal-body {
+      padding: 15px;
+      font-size: 14px;
+    }
+    
+    .output.skill-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .versions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .version-item {
+    background-color: rgba(97, 175, 239, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #61afef;
+  }
+</style>
+
+<div class="terminal">
+  <div class="terminal-header">
+    <div class="terminal-controls">
+      <a href="/whoami" class="terminal-home-link">← home</a>
+    </div>
+    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ about-me</div>
+  </div>
+  <div class="terminal-body">
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ whoami</span>
+      </div>
+      <div class="about-text">
+        Platform Engineering professional specializing in AWS infrastructure, CI/CD automation, and Kubernetes orchestration. I architect scalable systems that drive operational excellence, from implementing observability solutions to designing modular infrastructure-as-code patterns.
+      </div>
+    </div>
+    
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
+      </div>
+      <div class="about-text">
+        Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ cd /usr/local/skills && find . -type f -name "*.tool" | sort</span>
+      </div>
+      <div class="about-text">
+        <div class="skills-grid">
+          <div class="skills-column">
+            <div class="category">Automation</div>
+            <div class="skill-item">GitLab-CI</div>
+            <div class="skill-item">GitHub-Actions</div>
+            <div class="skill-item">Jenkins</div>
+            <div class="skill-item">Helm</div>
+            <div class="skill-item">AWS-CDK</div>
+            <div class="skill-item">CloudFormation</div>
+            <div class="skill-item">Terraform</div>
+            <div class="category">Cloud</div>
+            <div class="skill-item">AWS</div>
+            <div class="skill-item">Kubernetes</div>
+          </div>
+          <div class="skills-column">
+            <div class="category">Monitoring</div>
+            <div class="skill-item">Datadog</div>
+            <div class="skill-item">ELK</div>
+            <div class="skill-item">Grafana</div>
+            <div class="skill-item">Prometheus</div>
+            <div class="category">Programming</div>
+            <div class="skill-item">Go</div>
+            <div class="skill-item">Python</div>
+            <div class="skill-item">TypeScript</div>
+            <div class="skill-item">Java</div>
+            <div class="skill-item">Bash</div>
+          </div>
+          <div class="skills-column">
+            <div class="category">Security</div>
+            <div class="skill-item">Trivy</div>
+            <div class="skill-item">SonarQube</div>
+            <div class="skill-item">Security-Hub</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ docker --version && kubectl version --client && terraform --version && helm version --short</span>
+      </div>
+      <div class="about-text">
+        Docker version 24.0.5, build ced0996<br>
+        Client Version: v1.28.2<br>
+        Terraform v1.7.0<br>
+        v3.13.1
+      </div>
+    </div>
+
+    <!-- Add this CSS to your existing style section -->
+    <style>
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .skills-column {
+      min-width: 180px;
+    }
+
+    @media (max-width: 768px) {
+      .skills-grid {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    </style>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$</span>
+        <span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</div>
+{{ end }}

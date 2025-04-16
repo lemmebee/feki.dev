@@ -2,172 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on whoami</title>
-    <link>/posts/</link>
-    <description>whoami (Posts)</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <link>http://localhost:1313/whoami/posts/</link>
+    <description>Recent content in Posts on whoami</description>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    
-      
-        <managingEditor>ehabsfeki@gmail.com
-          
-            (Ehab ELFEKI)
-          
-        </managingEditor>
-      
-
-      
-    
-
-    
     <lastBuildDate>Thu, 03 Apr 2025 22:30:56 +0200</lastBuildDate>
-    
-    <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <atom:link href="http://localhost:1313/whoami/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
-      <link>/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
+      <link>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
       <pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate>
-      <author>ehabsfeki@gmail.com (Ehab ELFEKI)</author>
-      <guid>/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr:&lt;/strong&gt; Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.&lt;/p&gt;
-&lt;h2 id=&#34;the-challenge-when-templates-become-obstacles&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#the-challenge-when-templates-become-obstacles&#34;&gt;
-        #
-    &lt;/a&gt;
-    The Challenge: When Templates Become Obstacles
-&lt;/div&gt;
-&lt;/h2&gt;
-&lt;p&gt;Our previous CI template setup suffered from several growing pains:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Code Duplication:&lt;/strong&gt; Similar logic, like setting up specific language environments or deployment steps, was copied across numerous templates.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Limited Flexibility:&lt;/strong&gt; Customizing pipelines often meant duplicating large chunks of template code just to make small modifications.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Poor Modularity:&lt;/strong&gt; A change, for instance, to a scanning tool configuration, required hunting down and updating multiple files.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Hardcoded Assumptions:&lt;/strong&gt; Templates often made rigid assumptions about project structure or the specific language used, making them difficult to adapt. Example: A build job might only work if &lt;code&gt;requirements.txt&lt;/code&gt; exists, failing for Node.js projects.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;These issues led to slower development cycles and increased the risk of inconsistencies. It was clear a major overhaul was needed.&lt;/p&gt;
-&lt;h2 id=&#34;the-transformation-introducing-a-modular-language-agnostic-architecture&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#the-transformation-introducing-a-modular-language-agnostic-architecture&#34;&gt;
-        #
-    &lt;/a&gt;
-    The Transformation: Introducing a Modular, Language-Agnostic Architecture
-&lt;/div&gt;
-&lt;/h2&gt;
-&lt;p&gt;We embarked on a significant refactoring effort, guided by principles of modularity, flexibility, and maintainability. Here are the key technical improvements:&lt;/p&gt;
-&lt;h3 id=&#34;1-modular-design-with-include&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#1-modular-design-with-include&#34;&gt;
-        ##
-    &lt;/a&gt;
-    1. Modular Design with &lt;code&gt;include&lt;/code&gt;
-&lt;/div&gt;
-&lt;/h3&gt;
-&lt;p&gt;We heavily leveraged GitLab CI&amp;rsquo;s &lt;code&gt;include:&lt;/code&gt; keyword. Instead of one monolithic &lt;code&gt;.gitlab-ci.yml&lt;/code&gt;, projects now include relevant template parts. We created a &lt;code&gt;common/&lt;/code&gt; directory for shared logic (e.g., security scanning steps) and a &lt;code&gt;languages/&lt;/code&gt; directory for specific configurations (Node.js, Python).&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Example Structure:&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# .gitlab-ci.yml in a user&amp;#39;s project&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;include&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  - &lt;span style=&#34;color:#f92672&#34;&gt;project&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;your-group/your-templates-repo&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;ref&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;main&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Or a specific version tag&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;file&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      - &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/common/security.yml&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      - &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/languages/python.yml&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Include if it&amp;#39;s a Python project&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      - &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/pipeline-template/lambda.yml&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# If deploying a Lambda&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;variables&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;PYTHON_APP_DIR&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;src&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Tell the template where the code lives&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2-language-agnostic-approach--smart-detection&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#2-language-agnostic-approach--smart-detection&#34;&gt;
-        ##
-    &lt;/a&gt;
-    2. Language-Agnostic Approach &amp;amp; Smart Detection
-&lt;/div&gt;
-&lt;/h3&gt;
-&lt;p&gt;The new architecture intelligently detects the project&amp;rsquo;s language and structure, often using predefined CI/CD variables (like &lt;code&gt;PYTHON_APP_DIR&lt;/code&gt; or &lt;code&gt;NODE_APP_DIR&lt;/code&gt;). Conditional logic (&lt;code&gt;rules:&lt;/code&gt;) within the templates ensures jobs run only when needed.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Example Conditional Rule (Conceptual):&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# From languages/python.yml&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.python_default_rules&lt;/span&gt;: &lt;span style=&#34;color:#75715e&#34;&gt;&amp;amp;python_default_rules&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;rules&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;$PYTHON_APP_DIR &amp;amp;&amp;amp; $PYTHON_APP_DIR != &amp;#34;.&amp;#34;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Run if Python dir is set&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f92672&#34;&gt;exists&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        - &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;$PYTHON_APP_DIR/pyproject.toml&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# And a key file exists&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f92672&#34;&gt;when&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;always&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#f92672&#34;&gt;when&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;never&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Don&amp;#39;t run otherwise&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;python-lint&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;: &lt;span style=&#34;color:#75715e&#34;&gt;*python_default_rules&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Apply the rule&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;script&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;Running Python linting in $PYTHON_APP_DIR...&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# - python lint commands...&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;3-unified-pipeline-stages&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#3-unified-pipeline-stages&#34;&gt;
-        ##
-    &lt;/a&gt;
-    3. Unified Pipeline Stages
-&lt;/div&gt;
-&lt;/h3&gt;
-&lt;p&gt;Common stages like &lt;code&gt;install-dependencies&lt;/code&gt; can now have language-specific implementations triggered conditionally, feeding into subsequent shared stages.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Example Unified Stage (Conceptual):&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# From common/pipeline.yml&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;install-dependencies&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;stage&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;install&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;script&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;All dependencies installed successfully&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;needs&lt;/span&gt;: &lt;span style=&#34;color:#75715e&#34;&gt;# Optional dependencies based on detected language&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#f92672&#34;&gt;job&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;python-install-dependencies&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Runs if python rules match&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f92672&#34;&gt;optional&lt;/span&gt;: &lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#f92672&#34;&gt;job&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;node-install-dependencies&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;# Runs if node rules match&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f92672&#34;&gt;optional&lt;/span&gt;: &lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;rules&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# Rule to run if *any* language was detected&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    - &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;$NODE_APP_DIR || $PYTHON_APP_DIR&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f92672&#34;&gt;when&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;always&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;4-advanced-cicd-capabilities&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#4-advanced-cicd-capabilities&#34;&gt;
-        ##
-    &lt;/a&gt;
-    4. Advanced CI/CD Capabilities
-&lt;/div&gt;
-&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Automated Semantic Versioning:&lt;/strong&gt; We implemented a system using commit message conventions (e.g., prefixing commits with &lt;code&gt;#major&lt;/code&gt;, &lt;code&gt;#minor&lt;/code&gt;, &lt;code&gt;#patch&lt;/code&gt;). CI automation detects these prefixes on merge to the main branch, calculates the next semantic version, creates a tag, and generates a changelog entry.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Enhanced Security Scanning:&lt;/strong&gt; Integrated Trivy for comprehensive container image and filesystem vulnerability scanning. Findings can be automatically pushed to AWS Security Hub for centralized visibility and tracking.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Multi-Language CDK Support:&lt;/strong&gt; Deployment templates now better handle AWS CDK projects written in different languages (like TypeScript, Python), running the appropriate &lt;code&gt;cdk&lt;/code&gt; commands based on detected project files (&lt;code&gt;package.json&lt;/code&gt;, &lt;code&gt;requirements.txt&lt;/code&gt;, etc.).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Improved Caching:&lt;/strong&gt; Implemented more intelligent caching strategies, particularly for Kubernetes scanning steps, to speed up pipeline execution.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;the-benefits-a-more-efficient-and-secure-future&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#the-benefits-a-more-efficient-and-secure-future&#34;&gt;
-        #
-    &lt;/a&gt;
-    The Benefits: A More Efficient and Secure Future
-&lt;/div&gt;
-&lt;/h2&gt;
-&lt;p&gt;This redesigned architecture yielded significant advantages:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Simplified Updates:&lt;/strong&gt; Modifying a common task (like a scanner update) requires changes in only one central place.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Faster Development:&lt;/strong&gt; Developers configure pipelines faster by including relevant blocks and setting a few variables.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Increased Consistency:&lt;/strong&gt; Reduced duplication ensures builds and deployments are more reliable and predictable.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Enhanced Security:&lt;/strong&gt; Automated, integrated scanning improves the overall security posture.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Greater Flexibility:&lt;/strong&gt; Easily onboard new languages or adapt to different project structures without massive template rewrites.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;conclusion&#34; &gt;
-&lt;div&gt;
-    &lt;a href=&#34;#conclusion&#34;&gt;
-        #
-    &lt;/a&gt;
-    Conclusion
-&lt;/div&gt;
-&lt;/h2&gt;
-&lt;p&gt;Refactoring CI/CD templates is a worthwhile investment. By embracing modularity (&lt;code&gt;include:&lt;/code&gt;), conditional logic (&lt;code&gt;rules:&lt;/code&gt;), automation (versioning, scanning), and a language-agnostic design, we transformed our internal templates from a bottleneck into a powerful accelerator. If your CI/CD setup feels more like a collection of scripts than a cohesive system, consider adopting these principles for a more maintainable, flexible, and efficient future.&lt;/p&gt;
-</description>
+      <guid>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;tl;dr:&lt;/strong&gt; Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>
