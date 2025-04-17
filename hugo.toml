@@ -7,8 +7,7 @@ theme = "nostyleplease"
   author = "Ehab ELFEKI"
   
   [params.theme_config]
-    appearance = "auto" # valid options: light, dark, auto
+    appearance = "dark" # valid options: light, dark, auto
     back_home_text = "← home"
     date_format = "2006-01-02"
     show_description = true
-    
