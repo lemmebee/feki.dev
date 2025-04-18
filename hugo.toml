@@ -1,6 +1,6 @@
 baseURL = "https://lemmebee.github.io/whoami/"
 languageCode = "en-us"
-title = "whoami"
+title = "feki"
 theme = "nostyleplease"
 
 [params]

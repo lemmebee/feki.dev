@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on whoami</title>
-    <link>http://localhost:1313/whoami/posts/</link>
-    <description>Recent content in Posts on whoami</description>
+    <title>Posts on feki</title>
+    <link>http://localhost:1313/feki/posts/</link>
+    <description>Recent content in Posts on feki</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 03 Apr 2025 22:30:56 +0200</lastBuildDate>
-    <atom:link href="http://localhost:1313/whoami/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/feki/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
-      <link>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
+      <link>http://localhost:1313/feki/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
       <pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate>
-      <guid>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
+      <guid>http://localhost:1313/feki/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
       <description>&lt;p&gt;&lt;strong&gt;tl;dr:&lt;/strong&gt; Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.&lt;/p&gt;</description>
     </item>
   </channel>

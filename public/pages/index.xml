@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Pages on whoami</title>
-    <link>http://localhost:1313/whoami/pages/</link>
-    <description>Recent content in Pages on whoami</description>
+    <title>Pages on feki</title>
+    <link>http://localhost:1313/feki/pages/</link>
+    <description>Recent content in Pages on feki</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <atom:link href="http://localhost:1313/whoami/pages/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/feki/pages/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
-      <link>http://localhost:1313/whoami/pages/about/</link>
+      <link>http://localhost:1313/feki/pages/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/whoami/pages/about/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$whoami&lt;/strong&gt;&#xA;Platform Engineering professional specializing in AWS infrastructure, CI/CD automation, and Kubernetes orchestration.&#xA;I architect scalable systems that drive operational excellence, from implementing observability solutions to designing modular infrastructure-as-code patterns.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$cat /etc/passions&lt;/strong&gt;&#xA;Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$cd /usr/local/skills &amp;amp;&amp;amp; find . -type f -name &amp;ldquo;*.tool&amp;rdquo; | sort&lt;/strong&gt;&#xA;./automation/GitLab-CI.tool&#xA;./automation/GitHub-Actions.tool&#xA;./automation/Jenkins.tool&#xA;./cloud/AWS-CDK.tool&#xA;./cloud/AWS-EC2.tool&#xA;./cloud/AWS-EKS.tool&#xA;./cloud/AWS-Lambda.tool&#xA;./cloud/AWS-S3.tool&#xA;./cloud/AWS-Security-Hub.tool&#xA;./cloud/CloudFormation.tool&#xA;./cloud/Helm.tool&#xA;./cloud/Kubernetes.tool&#xA;./cloud/Terraform.tool&#xA;./monitoring/Datadog.tool&#xA;./monitoring/ELK.tool&#xA;./monitoring/Grafana.tool&#xA;./monitoring/Prometheus.tool&#xA;./programming/Go.tool&#xA;./programming/Python.tool&#xA;./programming/TypeScript.tool&#xA;./programming/Java.tool&#xA;./programming/Bash.tool&#xA;./security/Trivy.tool&#xA;./security/SonarQube.tool&lt;/p&gt;</description>
+      <guid>http://localhost:1313/feki/pages/about/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$feki&lt;/strong&gt;&#xA;Platform Engineering professional specializing in AWS infrastructure, CI/CD automation, and Kubernetes orchestration.&#xA;I architect scalable systems that drive operational excellence, from implementing observability solutions to designing modular infrastructure-as-code patterns.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$cat /etc/passions&lt;/strong&gt;&#xA;Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;ehab@elfeki:~$cd /usr/local/skills &amp;amp;&amp;amp; find . -type f -name &amp;ldquo;*.tool&amp;rdquo; | sort&lt;/strong&gt;&#xA;./automation/GitLab-CI.tool&#xA;./automation/GitHub-Actions.tool&#xA;./automation/Jenkins.tool&#xA;./cloud/AWS-CDK.tool&#xA;./cloud/AWS-EC2.tool&#xA;./cloud/AWS-EKS.tool&#xA;./cloud/AWS-Lambda.tool&#xA;./cloud/AWS-S3.tool&#xA;./cloud/AWS-Security-Hub.tool&#xA;./cloud/CloudFormation.tool&#xA;./cloud/Helm.tool&#xA;./cloud/Kubernetes.tool&#xA;./cloud/Terraform.tool&#xA;./monitoring/Datadog.tool&#xA;./monitoring/ELK.tool&#xA;./monitoring/Grafana.tool&#xA;./monitoring/Prometheus.tool&#xA;./programming/Go.tool&#xA;./programming/Python.tool&#xA;./programming/TypeScript.tool&#xA;./programming/Java.tool&#xA;./programming/Bash.tool&#xA;./security/Trivy.tool&#xA;./security/SonarQube.tool&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

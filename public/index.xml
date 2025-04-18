@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>whoami</title>
-    <link>http://localhost:1313/whoami/</link>
-    <description>Recent content on whoami</description>
+    <title>feki</title>
+    <link>http://localhost:1313/feki/</link>
+    <description>Recent content on feki</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 16 Apr 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/whoami/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/feki/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
-      <link>http://localhost:1313/whoami/about/</link>
+      <link>http://localhost:1313/feki/about/</link>
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/whoami/about/</guid>
+      <guid>http://localhost:1313/feki/about/</guid>
       <description></description>
     </item>
     <item>
       <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
-      <link>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
+      <link>http://localhost:1313/feki/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
       <pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate>
-      <guid>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
+      <guid>http://localhost:1313/feki/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
       <description>&lt;p&gt;&lt;strong&gt;tl;dr:&lt;/strong&gt; Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;table-of-contents&#34;&gt;Table of contents&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#the-challenge-when-templates-become-obstacles&#34;&gt;The Challenge: When Templates Become Obstacles&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#the-transformation-introducing-a-modular-language-agnostic-architecture&#34;&gt;The Transformation: Introducing a Modular, Language-Agnostic Architecture&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#1-modular-design-with-include&#34;&gt;1. Modular Design with &lt;code&gt;include&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#2-language-agnostic-approach--smart-detection&#34;&gt;2. Language-Agnostic Approach &amp;amp; Smart Detection&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#3-unified-pipeline-stages&#34;&gt;3. Unified Pipeline Stages&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#4-advanced-cicd-capabilities&#34;&gt;4. Advanced CI/CD Capabilities&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#the-benefits-a-more-efficient-and-secure-future&#34;&gt;The Benefits: A More Efficient and Secure Future&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#conclusion&#34;&gt;Conclusion&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.&lt;/p&gt;</description>
     </item>
   </channel>

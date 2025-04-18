@@ -2,20 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/whoami/about/</loc>
+    <loc>http://localhost:1313/feki/about/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/whoami/</loc>
+    <loc>http://localhost:1313/feki/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/whoami/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</loc>
+    <loc>http://localhost:1313/feki/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</loc>
     <lastmod>2025-04-03T22:30:56+02:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/whoami/posts/</loc>
+    <loc>http://localhost:1313/feki/posts/</loc>
     <lastmod>2025-04-03T22:30:56+02:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/whoami/categories/</loc>
+    <loc>http://localhost:1313/feki/categories/</loc>
   </url><url>
-    <loc>http://localhost:1313/whoami/tags/</loc>
+    <loc>http://localhost:1313/feki/tags/</loc>
   </url>
 </urlset>
