@@ -1,7 +1,7 @@
 {
 	"version": 3,
 	"file": "main.css",
-	"sourceRoot": "/home/lemmebee/Downloads/hugo-20250413T124053Z-001/hugo/feki",
+	"sourceRoot": "/home/lemmebee/Downloads/hugo-20250413T124053Z-001/hugo/whoami",
 	"sources": [
 		"themes/nostyleplease/assets/css/main.scss"
 	],
