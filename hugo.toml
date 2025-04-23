@@ -1,6 +1,6 @@
-baseURL = "https://lemmebee.github.io/feki/"
+baseURL = "https://lemmebee.github.io/feki.dev/"
 languageCode = "en-us"
-title = "feki"
+title = "feki.dev"
 theme = "nostyleplease"
 
 [params]
