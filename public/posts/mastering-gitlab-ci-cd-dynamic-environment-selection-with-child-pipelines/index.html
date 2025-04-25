@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><script src="/feki.dev/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=feki.dev/livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="Table of Contents
+
+The Problem
+The Key Challenge
+Failed Approaches
+The Solution: Child Pipelines
+How the Solution Works
+Key Advantages
+Gotchas and Lessons Learned
+Conclusion
+
+In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.">  
+
+  <title>
+    
+      Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/feki.dev/" />
+  
+  
+  
+  <link rel="stylesheet" href="/feki.dev/css/main.b47044f59f4994e216568416ab965e022eec7effdfa60a483565282d9a1099e265e6233ecc243126196849d302836cc6dc11ce8f58ec13f31bebaaf78ceb3a0b.css" integrity="sha512-tHBE9Z9JlOIWVoQWq5ZeAi7sfv/fpgpINWUoLZoQmeJl5iM&#43;zCQxJhloSdMCg2zG3BHOj1jsE/Mb66r3jOs6Cw==" />
+  
+</head>
+<body a="dark">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+                <div class="post-meta">
+                    <a href="/feki.dev/">← home</a>
+
+                    <p>
+                        <time datetime="2025-04-25 20:30:56 &#43;0200 CEST">
+                            2025-04-25
+                        </time>
+                    </p>
+                </div>
+
+<article>
+    <h1>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</h1>
+
+    
+
+    <h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#the-problem">The Problem</a></li>
+<li><a href="#the-key-challenge">The Key Challenge</a></li>
+<li><a href="#failed-approaches">Failed Approaches</a></li>
+<li><a href="#the-solution-child-pipelines">The Solution: Child Pipelines</a></li>
+<li><a href="#how-the-solution-works">How the Solution Works</a></li>
+<li><a href="#key-advantages">Key Advantages</a></li>
+<li><a href="#gotchas-and-lessons-learned">Gotchas and Lessons Learned</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+<p>In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>I needed to implement a scheduled testing strategy with the following requirements:</p>
+<ol>
+<li>
+<p>Tests should run on a 2-week cycle across different environments:</p>
+<ul>
+<li>Week 1: Wednesday to Friday - Run on develop environment</li>
+<li>Week 2: Monday to Wednesday - Run on develop environment</li>
+<li>Week 2: Thursday - Run on staging environment</li>
+<li>Other days: No tests</li>
+</ul>
+</li>
+<li>
+<p>Each environment (develop, staging) had its own set of credentials and configuration values stored as GitLab CI/CD variables with environment scope.</p>
+</li>
+<li>
+<p>The tests needed access to these environment-specific variables to run properly.</p>
+</li>
+</ol>
+<p>The initial implementation looked like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">tests-scheduled</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">extends</span>: <span style="color:#ae81ff">.tests</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">placeholder</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">rules</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">if</span>: <span style="color:#e6db74">&#39;($CI_PIPELINE_SOURCE == &#34;schedule&#34; &amp;&amp; $SCHEDULER_JOB == &#34;testing&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">|</span> <span style="color:#75715e">#shell</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Get current day of week (1-7, Monday is 1)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">DAY_OF_WEEK=$(date +%u)</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Determine which week in the 2-week cycle</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">WEEK_NUMBER=$(date +%V)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">CYCLE_WEEK=$((WEEK_NUMBER % 2))</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Apply 2-week cycle logic</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">if [[ $CYCLE_WEEK == 0 &amp;&amp; $DAY_OF_WEEK -ge 3 &amp;&amp; $DAY_OF_WEEK -le 5 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 1: Wednesday-Friday -&gt; develop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;develop&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">elif [[ $CYCLE_WEEK == 1 &amp;&amp; $DAY_OF_WEEK == 4 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 2: Thursday -&gt; staging</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;staging&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">elif [[ $CYCLE_WEEK == 1 &amp;&amp; $DAY_OF_WEEK -ge 1 &amp;&amp; $DAY_OF_WEEK -le 3 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 2: Monday-Wednesday -&gt; develop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;develop&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">else</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">echo &#34;Today doesn&#39;t match any scheduled testing pattern. Skipping tests.&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">exit 0</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">fi</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">echo &#34;Running tests for environment: $TARGET_ENV&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">npm run test:remote</span>
+</span></span></code></pre></div><h2 id="the-key-challenge">The Key Challenge</h2>
+<p>When running this job, I encountered a fundamental problem: the environment-specific variables (like credentials) weren&rsquo;t accessible to the job. Why? Because GitLab CI/CD only makes environment-scoped variables available when the job&rsquo;s environment matches the variable&rsquo;s scope.</p>
+<p>My job had <code>environment: name: placeholder</code>, but the variables were scoped to &ldquo;develop&rdquo; and &ldquo;staging&rdquo; environments. Even though I was calculating <code>TARGET_ENV</code> correctly, GitLab wasn&rsquo;t injecting the right variables into the execution context.</p>
+<h2 id="failed-approaches">Failed Approaches</h2>
+<p>I tried several approaches that didn&rsquo;t work:</p>
+<ol>
+<li>
+<p><strong>Dynamic environment setting</strong>: Attempting to change the environment mid-job using <code>CI_ENVIRONMENT_NAME</code> variable didn&rsquo;t work properly.</p>
+</li>
+<li>
+<p><strong>Creating a .env file</strong>: Checking for a non-existent <code>.env</code> file that would magically contain our environment variables wasn&rsquo;t successful.</p>
+</li>
+<li>
+<p><strong>Hardcoding values</strong>: This would be a security risk and maintenance nightmare.</p>
+</li>
+</ol>
+<h2 id="the-solution-child-pipelines">The Solution: Child Pipelines</h2>
+<p>The solution I implemented leverages GitLab&rsquo;s child pipeline feature to dynamically create a pipeline with the correct environment context. Here&rsquo;s the two-job approach I developed:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># First job: determines environment and creates child pipeline YAML</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">determine-environment</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">prepare</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">rules</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">if</span>: <span style="color:#e6db74">&#39;($CI_PIPELINE_SOURCE == &#34;schedule&#34; &amp;&amp; $SCHEDULER_JOB == &#34;testing&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">artifacts</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">paths</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">child-pipeline.yml</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">|</span> <span style="color:#75715e">#shell</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Get current day of week (1-7, Monday is 1)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">DAY_OF_WEEK=$(date +%u)</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Determine which week in the 2-week cycle</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">WEEK_NUMBER=$(date +%V)</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">CYCLE_WEEK=$((WEEK_NUMBER % 2))</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Apply 2-week cycle logic</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">if [[ $CYCLE_WEEK == 0 &amp;&amp; $DAY_OF_WEEK -ge 3 &amp;&amp; $DAY_OF_WEEK -le 5 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 1: Wednesday-Friday -&gt; develop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;develop&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">elif [[ $CYCLE_WEEK == 1 &amp;&amp; $DAY_OF_WEEK == 4 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 2: Thursday -&gt; staging</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;staging&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">elif [[ $CYCLE_WEEK == 1 &amp;&amp; $DAY_OF_WEEK -ge 1 &amp;&amp; $DAY_OF_WEEK -le 3 ]]; then</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Week 2: Monday-Wednesday -&gt; develop</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">export TARGET_ENV=&#34;develop&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">else</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">echo &#34;Today doesn&#39;t match any scheduled testing pattern. Skipping tests.&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create a placeholder file to satisfy the artifacts requirement</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">touch child-pipeline.yml</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Exit with error code to mark job as failed and stop the pipeline</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">exit 1</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">fi</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">echo &#34;Creating child pipeline for environment: $TARGET_ENV&#34;</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># Create child pipeline with proper environment configuration</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">cat &gt; child-pipeline.yml &lt;&lt; EOF</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">image</span>: <span style="color:#ae81ff">node:latest</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">stages</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">test</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">reporting</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">run-tests</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">test</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">${TARGET_ENV}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">before_script</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">npm ci</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">after_script</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">echo &#34;Completed tests&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">parallel</span>: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">artifacts</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">when</span>: <span style="color:#ae81ff">always</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">expire_in</span>: <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">days</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">paths</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#ae81ff">test-results</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">echo &#34;Running tests in ${TARGET_ENV} environment&#34; </span>
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">npm run test:remote</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">generate-report</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">reporting</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">before_script</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">npm ci</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">script</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">npm run generate-report</span>
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">npm run notify-team</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">artifacts</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">when</span>: <span style="color:#ae81ff">always</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">expire_in</span>: <span style="color:#ae81ff">7</span> <span style="color:#ae81ff">days</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">paths</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#ae81ff">test-report</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ae81ff">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Second job: triggers the child pipeline</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">tests-scheduled</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">stage</span>: <span style="color:#ae81ff">test</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">needs</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">determine-environment</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">rules</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">if</span>: <span style="color:#e6db74">&#39;($CI_PIPELINE_SOURCE == &#34;schedule&#34; &amp;&amp; $SCHEDULER_JOB == &#34;testing&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">trigger</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">include</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">artifact</span>: <span style="color:#ae81ff">child-pipeline.yml</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">job</span>: <span style="color:#ae81ff">determine-environment</span>
+</span></span></code></pre></div><h2 id="how-the-solution-works">How the Solution Works</h2>
+<ol>
+<li>
+<p><strong>Job Separation</strong>: I split the logic into two jobs:</p>
+<ul>
+<li><code>determine-environment</code>: Decides which environment to test based on the date</li>
+<li><code>tests-scheduled</code>: Triggers a child pipeline with the configuration from the first job</li>
+</ul>
+</li>
+<li>
+<p><strong>Dynamic YAML Generation</strong>: The first job creates a complete YAML configuration for the child pipeline, including:</p>
+<ul>
+<li>The Docker image</li>
+<li>Job configuration</li>
+<li>The proper <code>environment: name: ${TARGET_ENV}</code> setting</li>
+<li>Test execution commands</li>
+</ul>
+</li>
+<li>
+<p><strong>Child Pipeline Trigger</strong>: The second job takes this generated YAML and runs it as a child pipeline.</p>
+</li>
+<li>
+<p><strong>Environment-Scoped Variables</strong>: Because the child pipeline&rsquo;s job has the correct environment name, GitLab automatically injects all the environment-specific variables.</p>
+</li>
+<li>
+<p><strong>Proper Failure Handling</strong>: If testing shouldn&rsquo;t run on a particular day, I explicitly fail the first job (with <code>exit 1</code>), which prevents the child pipeline from running.</p>
+</li>
+</ol>
+<h2 id="key-advantages">Key Advantages</h2>
+<p>This approach provides several significant benefits:</p>
+<ol>
+<li>
+<p><strong>Environment Variable Isolation</strong>: Each environment&rsquo;s variables are properly scoped and isolated.</p>
+</li>
+<li>
+<p><strong>Schedule-Aware Testing</strong>: The 2-week cycle logic determines exactly when and where tests should run.</p>
+</li>
+<li>
+<p><strong>Clean Pipeline Structure</strong>: The parent pipeline handles scheduling logic, while the child pipeline handles test execution.</p>
+</li>
+<li>
+<p><strong>No Template Inheritance Issues</strong>: The child pipeline has a complete, self-contained configuration without relying on parent templates.</p>
+</li>
+<li>
+<p><strong>Proper Failure Reporting</strong>: When tests shouldn&rsquo;t run on a particular day, the pipeline fails clearly and early.</p>
+</li>
+</ol>
+<h2 id="gotchas-and-lessons-learned">Gotchas and Lessons Learned</h2>
+<p>During implementation, I encountered a few subtle issues:</p>
+<ol>
+<li>
+<p><strong>Script + Trigger Conflict</strong>: GitLab doesn&rsquo;t allow having both a <code>script</code> and a <code>trigger</code> in the same job, which is why I needed two separate jobs.</p>
+</li>
+<li>
+<p><strong>Child Pipeline Template Access</strong>: Child pipelines don&rsquo;t have access to the parent pipeline&rsquo;s templates (like <code>.tests</code>), so I had to include all configuration directly.</p>
+</li>
+<li>
+<p><strong>Variable Escaping</strong>: When creating the child pipeline YAML, environment variables need to be escaped properly (using backslashes) to prevent premature expansion.</p>
+</li>
+<li>
+<p><strong>Artifact Management</strong>: Always create the artifact file (even an empty one) to avoid &ldquo;artifact not found&rdquo; errors in downstream jobs.</p>
+</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>Dynamic environment selection with child pipelines is a powerful technique for complex CI/CD workflows. It allows you to make runtime decisions about where and when to run tests while still maintaining proper environment isolation and variable scoping.</p>
+<p>This approach is particularly valuable when:</p>
+<ul>
+<li>You have multiple environments with different configurations</li>
+<li>Your test scheduling logic is complex</li>
+<li>You need to ensure proper access to environment-specific credentials</li>
+<li>You want to avoid running unnecessary tests</li>
+</ul>
+<p>By leveraging GitLab&rsquo;s child pipeline feature, you can create truly dynamic, environment-aware testing workflows that adapt to your schedule and requirements while maintaining proper security and isolation.</p>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>

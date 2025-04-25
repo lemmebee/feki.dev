@@ -6,8 +6,15 @@
     <description>Recent content in Posts on feki.dev</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 03 Apr 2025 22:30:56 +0200</lastBuildDate>
+    <lastBuildDate>Fri, 25 Apr 2025 20:30:56 +0200</lastBuildDate>
     <atom:link href="http://localhost:1313/feki.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</title>
+      <link>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link>
+      <pubDate>Fri, 25 Apr 2025 20:30:56 +0200</pubDate>
+      <guid>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</guid>
+      <description>&lt;h1 id=&#34;mastering-gitlab-cicd-dynamic-environment-selection-with-child-pipelines&#34;&gt;Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines&lt;/h1&gt;&#xA;&lt;p&gt;In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&amp;rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.&lt;/p&gt;&#xA;&lt;h2 id=&#34;the-problem&#34;&gt;The Problem&lt;/h2&gt;&#xA;&lt;p&gt;I needed to implement a scheduled testing strategy with the following requirements:&lt;/p&gt;</description>
+    </item>
     <item>
       <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
       <link>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>

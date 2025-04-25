@@ -2,16 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/feki.dev/</loc>
+    <lastmod>2025-04-25T20:30:56+02:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</loc>
+    <lastmod>2025-04-25T20:30:56+02:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/feki.dev/posts/</loc>
+    <lastmod>2025-04-25T20:30:56+02:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/feki.dev/about/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/feki.dev/</loc>
-    <lastmod>2025-04-16T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</loc>
-    <lastmod>2025-04-03T22:30:56+02:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/feki.dev/posts/</loc>
     <lastmod>2025-04-03T22:30:56+02:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/feki.dev/categories/</loc>
