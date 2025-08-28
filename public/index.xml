@@ -6,8 +6,15 @@
     <description>Recent content on feki.dev</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 25 Apr 2025 20:30:56 +0200</lastBuildDate>
+    <lastBuildDate>Thu, 28 Aug 2025 21:14:07 +0200</lastBuildDate>
     <atom:link href="http://localhost:1313/feki.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance</title>
+      <link>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</link>
+      <pubDate>Thu, 28 Aug 2025 21:14:07 +0200</pubDate>
+      <guid>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</guid>
+      <description>&lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#the-scenario&#34;&gt;The Scenario&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#our-architecture&#34;&gt;Our Architecture&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#prerequisites&#34;&gt;Prerequisites&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#the-migration-strategy-why-pg_dump-and-pg_restore&#34;&gt;The Migration Strategy: Why &lt;code&gt;pg_dump&lt;/code&gt; and &lt;code&gt;pg_restore&lt;/code&gt;?&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#step-by-step-migration-guide&#34;&gt;Step-by-Step Migration Guide&lt;/a&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#phase-1-preparing-the-target-non-prod-account&#34;&gt;Phase 1: Preparing the Target (Non-Prod) Account&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#phase-2-preparing-the-source-accounts-a--b&#34;&gt;Phase 2: Preparing the Source Accounts (A &amp;amp; B)&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#phase-3-executing-the-migration-script&#34;&gt;Phase 3: Executing the Migration Script&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#phase-4-post-migration-validation&#34;&gt;Phase 4: Post-Migration Validation&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#final-considerations&#34;&gt;Final Considerations&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;As organizations grow, it&amp;rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs. A common strategy to streamline operations is to consolidate these non-production databases into a single, shared RDS instance in a central &amp;ldquo;Non-Prod&amp;rdquo; account.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</title>
       <link>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link>
