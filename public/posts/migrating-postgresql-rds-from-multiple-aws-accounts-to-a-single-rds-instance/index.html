@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><script src="/feki.dev/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=feki.dev/livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="Table of Contents The Scenario Our Architecture Prerequisites The Migration Strategy: Why pg_dump and pg_restore? Step-by-Step Migration Guide Phase 1: Preparing the Target (Non-Prod) Account Phase 2: Preparing the Source Accounts (A &amp; B) Phase 3: Executing the Migration Script Phase 4: Post-Migration Validation Final Considerations As organizations grow, it&rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs.">  
+
+  <title>
+    
+      Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/feki.dev/" />
+  
+  
+  
+  <link rel="stylesheet" href="/feki.dev/css/main.08bbe3917ce267c1e63b1bd536c0beda4ca0c6a57dcc7286abe44c439aae60984655a8599b45a319e0f433863a97a44e23e916c6e173f1cd6577349bb65859a2.css" integrity="sha512-CLvjkXziZ8HmOxvVNsC&#43;2kygxqV9zHKGq&#43;RMQ5quYJhGVahZm0WjGeD0M4Y6l6ROI&#43;kWxuFz8c1ldzSbtlhZog==" />
+  
+</head>
+<body a="dark">
+        <main class="page-content" aria-label="Content">
+            <div class="content-panel">
+                <div class="w">
+                    <div class="post-meta">
+                        <a href="/feki.dev/">← home</a>
+
+                        <p>
+                            <time datetime="2025-08-28 21:14:07 &#43;0200 CEST">
+                                2025-08-28
+                            </time>
+                        </p>
+                    </div>
+
+<article>
+    <h1>Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance</h1>
+
+    
+
+    <h1 id="table-of-contents">Table of Contents</h1>
+<ul>
+<li><a href="#the-scenario">The Scenario</a></li>
+<li><a href="#our-architecture">Our Architecture</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#the-migration-strategy-why-pg_dump-and-pg_restore">The Migration Strategy: Why <code>pg_dump</code> and <code>pg_restore</code>?</a></li>
+<li><a href="#step-by-step-migration-guide">Step-by-Step Migration Guide</a>
+<ul>
+<li><a href="#phase-1-preparing-the-target-non-prod-account">Phase 1: Preparing the Target (Non-Prod) Account</a></li>
+<li><a href="#phase-2-preparing-the-source-accounts-a--b">Phase 2: Preparing the Source Accounts (A &amp; B)</a></li>
+<li><a href="#phase-3-executing-the-migration-script">Phase 3: Executing the Migration Script</a></li>
+<li><a href="#phase-4-post-migration-validation">Phase 4: Post-Migration Validation</a></li>
+</ul>
+</li>
+<li><a href="#final-considerations">Final Considerations</a></li>
+</ul>
+<p>As organizations grow, it&rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs. A common strategy to streamline operations is to consolidate these non-production databases into a single, shared RDS instance in a central &ldquo;Non-Prod&rdquo; account.</p>
+<p>In this guide, we&rsquo;ll walk through a robust, script-based method for migrating multiple PostgreSQL RDS instances from different source AWS accounts into a single target RDS instance. We&rsquo;ll use a dedicated EC2 &ldquo;migration host&rdquo; and standard PostgreSQL tools (<code>pg_dump</code> and <code>pg_restore</code>) to ensure a reliable and repeatable process.</p>
+<h3 id="the-scenario">The Scenario</h3>
+<p>Imagine you have two source AWS accounts and one target account:</p>
+<ul>
+<li><strong>Source Account A</strong>: Contains an RDS instance with a database for one application (<code>app_db_a</code>).</li>
+<li><strong>Source Account B</strong>: Contains an RDS instance with a database for another application or environment (<code>app_db_b</code>).</li>
+<li><strong>Target Non-Prod Account</strong>: Where we want to host a single, larger RDS instance containing both <code>app_db_a</code> and <code>app_db_b</code> as separate logical databases.</li>
+</ul>
+<h3 id="our-architecture">Our Architecture</h3>
+<p>We will perform the migration from a central EC2 instance in the target account. This instance will assume IAM roles in the source accounts to gain the necessary access to pull database backups.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you begin, ensure you have the following in place:</p>
+<ol>
+<li><strong>IAM Permissions</strong>: You need administrative access in all three AWS accounts to manage IAM Roles, Policies, EC2, RDS, and VPC settings.</li>
+<li><strong>Networking</strong>:
+<ul>
+<li><strong>VPC Peering</strong>: You must establish and accept a VPC peering connection between the Target VPC and each Source VPC.</li>
+<li><strong>Route Tables</strong>: Update the route tables in all VPCs to direct traffic correctly across the peering connections.</li>
+<li><strong>Security Groups</strong>: This is critical.
+<ul>
+<li><strong>Source RDS Security Groups</strong>: Must allow inbound traffic on PostgreSQL port <code>5432</code> from the <strong>private IP address</strong> of the EC2 migration host.</li>
+<li><strong>Target RDS Security Group</strong>: Must allow inbound traffic on port <code>5432</code> from the EC2 migration host.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Credentials Management</strong>: You have the master credentials for all RDS instances. <strong>It is a security best practice to store these credentials in AWS Secrets Manager</strong> in their respective accounts, and this guide will assume you are doing so.</li>
+<li><strong>Tools</strong>: A Linux-based EC2 instance with the <strong>AWS CLI</strong> and the <strong>PostgreSQL client tools</strong> installed.</li>
+</ol>
+<h2 id="the-migration-strategy-why-pg_dump-and-pg_restore">The Migration Strategy: Why <code>pg_dump</code> and <code>pg_restore</code>?</h2>
+<p>For this task, we&rsquo;re choosing a logical backup-and-restore method.</p>
+<ul>
+<li><strong><code>pg_dump</code></strong>: Creates a consistent, portable text or binary-format backup of a single database.</li>
+<li><strong><code>pg_restore</code></strong>: Restores a database from an archive created by <code>pg_dump</code>.</li>
+</ul>
+<p>This approach is ideal because it&rsquo;s:</p>
+<ul>
+<li><strong>Flexible</strong>: It easily handles migrations between different PostgreSQL versions.</li>
+<li><strong>Granular</strong>: It allows us to dump a database from one server and restore it as a different logical database on another, which is exactly what we need.</li>
+<li><strong>Reliable</strong>: It&rsquo;s the standard, battle-tested method for PostgreSQL migrations.</li>
+</ul>
+<p><strong>Downtime Note</strong>: This method requires a brief downtime for the source applications to ensure the database dump is a consistent snapshot. Plan your migration window accordingly.</p>
+<hr>
+<h2 id="step-by-step-migration-guide">Step-by-Step Migration Guide</h2>
+<h3 id="phase-1-preparing-the-target-non-prod-account">Phase 1: Preparing the Target (Non-Prod) Account</h3>
+<ol>
+<li>
+<p><strong>Launch the EC2 Migration Host</strong></p>
+<ul>
+<li>Launch an Amazon Linux 2 EC2 instance (e.g., <code>t3.medium</code>) in the same VPC as your target RDS instance.</li>
+<li>Attach an IAM Role to it, which we&rsquo;ll create in the next step.</li>
+</ul>
+</li>
+<li>
+<p><strong>Create an IAM Role for the EC2 Host (<code>MigrationHostRole</code>)</strong>
+This role will allow our EC2 instance to assume roles in the source accounts. Create a policy named <code>AssumeCrossAccountRolePolicy</code> and attach it to the role.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;sts:AssumeRole&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Resource&#34;</span>: [
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;arn:aws:iam::SOURCE_A_ACCOUNT_ID:role/RdsCrossAccountAccessRole&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;arn:aws:iam::SOURCE_B_ACCOUNT_ID:role/RdsCrossAccountAccessRole&#34;</span>
+</span></span><span style="display:flex;"><span>            ]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Prepare the Target RDS Instance</strong></p>
+<ul>
+<li>Provision your consolidated PostgreSQL RDS instance if it doesn&rsquo;t already exist.</li>
+<li>Connect to the instance with a client like <code>psql</code> and create the empty databases that will receive the migrated data.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Connect as the master user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>psql <span style="color:#f92672">-</span>h <span style="color:#f92672">&lt;</span>your<span style="color:#f92672">-</span>target<span style="color:#f92672">-</span>rds<span style="color:#f92672">-</span>endpoint<span style="color:#f92672">&gt;</span> <span style="color:#f92672">-</span>U <span style="color:#f92672">&lt;</span>master_user<span style="color:#f92672">&gt;</span> <span style="color:#f92672">-</span>d postgres
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Run these commands
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> app_db_a;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> app_db_b;
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="phase-2-preparing-the-source-accounts-a--b">Phase 2: Preparing the Source Accounts (A &amp; B)</h3>
+<p><em><strong>Perform these steps in each source account.</strong></em></p>
+<ol>
+<li>
+<p><strong>Create the Cross-Account IAM Role (<code>RdsCrossAccountAccessRole</code>)</strong>
+This is the role that our EC2 host will assume.</p>
+<ul>
+<li><strong>Role Name</strong>: Use a consistent name, e.g., <code>RdsCrossAccountAccessRole</code>.</li>
+<li><strong>Trust Relationship</strong>: Configure the role to trust the <code>MigrationHostRole</code> from your Target Account.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Principal&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;AWS&#34;</span>: <span style="color:#e6db74">&#34;arn:aws:iam::TARGET_ACCOUNT_ID:role/MigrationHostRole&#34;</span>
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;sts:AssumeRole&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Attach a Permissions Policy</strong>
+Create and attach a policy to this role that grants permissions to read RDS details and fetch the database password from Secrets Manager.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;rds:DescribeDBInstances&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Resource&#34;</span>: <span style="color:#e6db74">&#34;*&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;secretsmanager:GetSecretValue&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Resource&#34;</span>: <span style="color:#e6db74">&#34;arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:YOUR_RDS_SECRET_NAME-*&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="phase-3-executing-the-migration-script">Phase 3: Executing the Migration Script</h3>
+<p>Now for the main event! Connect to your EC2 migration host and follow these steps.</p>
+<ol>
+<li>
+<p><strong>Install Tools</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo yum update -y
+</span></span><span style="display:flex;"><span>sudo yum install -y postgresql15 jq  <span style="color:#75715e"># Use the client version matching your DB</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>The Automation Script</strong>
+Create a file named <code>migrate_dbs.sh</code> and paste the script below. This script automates assuming roles, fetching credentials, dumping the source database, and restoring it to the target.</p>
+<p><strong>Before you run it, carefully update all the placeholder variables in the configuration section.</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Exit immediately if a command exits with a non-zero status.</span>
+</span></span><span style="display:flex;"><span>set -e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># --- Configuration: UPDATE THESE VARIABLES ---</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Target Account Details</span>
+</span></span><span style="display:flex;"><span>TARGET_RDS_IDENTIFIER<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;your-target-rds-instance-id&#34;</span>
+</span></span><span style="display:flex;"><span>TARGET_SECRET_ARN<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;arn:aws:secretsmanager:us-east-1:TARGET_ACCOUNT_ID:secret/your-target-secret&#34;</span>
+</span></span><span style="display:flex;"><span>TARGET_REGION<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;us-east-1&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Source A Details</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_ACCOUNT_ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;111111111111&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_ROLE_ARN<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;arn:aws:iam::</span><span style="color:#e6db74">${</span>SOURCE_A_ACCOUNT_ID<span style="color:#e6db74">}</span><span style="color:#e6db74">:role/RdsCrossAccountAccessRole&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_RDS_IDENTIFIER<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;source-a-rds-instance-id&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_SECRET_ARN<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;arn:aws:secretsmanager:us-east-1:</span><span style="color:#e6db74">${</span>SOURCE_A_ACCOUNT_ID<span style="color:#e6db74">}</span><span style="color:#e6db74">:secret/your-source-a-secret&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_DB_NAME<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;source_database_a&#34;</span> <span style="color:#75715e"># The actual DB name in the source RDS</span>
+</span></span><span style="display:flex;"><span>TARGET_A_DB_NAME<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;app_db_a&#34;</span>          <span style="color:#75715e"># The new DB name in the target RDS</span>
+</span></span><span style="display:flex;"><span>SOURCE_A_REGION<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;us-east-1&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Source B Details</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_ACCOUNT_ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;222222222222&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_ROLE_ARN<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;arn:aws:iam::</span><span style="color:#e6db74">${</span>SOURCE_B_ACCOUNT_ID<span style="color:#e6db74">}</span><span style="color:#e6db74">:role/RdsCrossAccountAccessRole&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_RDS_IDENTIFIER<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;source-b-rds-instance-id&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_SECRET_ARN<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;arn:aws:secretsmanager:us-east-1:</span><span style="color:#e6db74">${</span>SOURCE_B_ACCOUNT_ID<span style="color:#e6db74">}</span><span style="color:#e6db74">:secret/your-source-b-secret&#34;</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_DB_NAME<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;source_database_b&#34;</span> <span style="color:#75715e"># The actual DB name in the source RDS</span>
+</span></span><span style="display:flex;"><span>TARGET_B_DB_NAME<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;app_db_b&#34;</span>          <span style="color:#75715e"># The new DB name in the target RDS</span>
+</span></span><span style="display:flex;"><span>SOURCE_B_REGION<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;us-east-1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># --- End Configuration ---</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># --- Reusable Migration Function ---</span>
+</span></span><span style="display:flex;"><span>migrate_source<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    local NICKNAME<span style="color:#f92672">=</span>$1; local ROLE_ARN<span style="color:#f92672">=</span>$2; local RDS_IDENTIFIER<span style="color:#f92672">=</span>$3;
+</span></span><span style="display:flex;"><span>    local SECRET_ARN<span style="color:#f92672">=</span>$4; local SOURCE_DB<span style="color:#f92672">=</span>$5; local TARGET_DB<span style="color:#f92672">=</span>$6;
+</span></span><span style="display:flex;"><span>    local REGION<span style="color:#f92672">=</span>$7; local DUMP_FILE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/tmp/</span><span style="color:#e6db74">${</span>TARGET_DB<span style="color:#e6db74">}</span><span style="color:#e6db74">.dump&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--- Starting Migration for: </span><span style="color:#e6db74">${</span>NICKNAME<span style="color:#e6db74">}</span><span style="color:#e6db74"> ---&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 1. Assume Role in the source account</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Assuming role in source account...&#34;</span>
+</span></span><span style="display:flex;"><span>    CREDS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws sts assume-role --role-arn <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>ROLE_ARN<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> --role-session-name <span style="color:#e6db74">&#34;RDSCrossAccountMigration&#34;</span> --output json<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    export AWS_ACCESS_KEY_ID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>CREDS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .Credentials.AccessKeyId<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    export AWS_SECRET_ACCESS_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>CREDS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .Credentials.SecretAccessKey<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    export AWS_SESSION_TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>CREDS<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .Credentials.SessionToken<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 2. Get Source RDS Connection Details</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Fetching source RDS details for </span><span style="color:#e6db74">${</span>RDS_IDENTIFIER<span style="color:#e6db74">}</span><span style="color:#e6db74">...&#34;</span>
+</span></span><span style="display:flex;"><span>    SOURCE_ENDPOINT<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws rds describe-db-instances --db-instance-identifier <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>RDS_IDENTIFIER<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> --region <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>REGION<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .DBInstances<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>.Endpoint.Address<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    SOURCE_SECRET<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws secretsmanager get-secret-value --secret-id <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SECRET_ARN<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> --region <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>REGION<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .SecretString<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    SOURCE_USER<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SOURCE_SECRET<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .username<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    export PGPASSWORD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SOURCE_SECRET<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .password<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$SOURCE_ENDPOINT<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span> echo <span style="color:#e6db74">&#34;Error: Failed to get source endpoint.&#34;</span>; exit 1; <span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 3. Dump the source database</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Dumping database &#39;</span><span style="color:#e6db74">${</span>SOURCE_DB<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;...&#34;</span>
+</span></span><span style="display:flex;"><span>    pg_dump -Fc -v -h <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SOURCE_ENDPOINT<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -U <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SOURCE_USER<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -d <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>SOURCE_DB<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -f <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>DUMP_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Dump complete: </span><span style="color:#e6db74">${</span>DUMP_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Unset temporary AWS credentials</span>
+</span></span><span style="display:flex;"><span>    unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 4. Get Target RDS Connection Details</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Fetching target RDS details...&#34;</span>
+</span></span><span style="display:flex;"><span>    TARGET_ENDPOINT<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws rds describe-db-instances --db-instance-identifier <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_RDS_IDENTIFIER<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> --region <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_REGION<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .DBInstances<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>.Endpoint.Address<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    TARGET_SECRET<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws secretsmanager get-secret-value --secret-id <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_SECRET_ARN<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> --region <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_REGION<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .SecretString<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    TARGET_USER<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_SECRET<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .username<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    export PGPASSWORD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_SECRET<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> | jq -r .password<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$TARGET_ENDPOINT<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span> echo <span style="color:#e6db74">&#34;Error: Failed to get target endpoint.&#34;</span>; exit 1; <span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 5. Restore to the target database</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Restoring dump to database &#39;</span><span style="color:#e6db74">${</span>TARGET_DB<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;...&#34;</span>
+</span></span><span style="display:flex;"><span>    pg_restore -v -h <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_ENDPOINT<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -U <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_USER<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> -d <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>TARGET_DB<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>DUMP_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--&gt; Restore complete.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 6. Cleanup</span>
+</span></span><span style="display:flex;"><span>    rm <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>DUMP_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>    unset PGPASSWORD
+</span></span><span style="display:flex;"><span>    echo <span style="color:#e6db74">&#34;--- Migration for </span><span style="color:#e6db74">${</span>NICKNAME<span style="color:#e6db74">}</span><span style="color:#e6db74"> finished successfully! ---&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># --- Main Execution ---</span>
+</span></span><span style="display:flex;"><span>migrate_source <span style="color:#e6db74">&#34;Source A&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_A_ROLE_ARN<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_A_RDS_IDENTIFIER<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_A_SECRET_ARN<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_A_DB_NAME<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$TARGET_A_DB_NAME<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_A_REGION<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>migrate_source <span style="color:#e6db74">&#34;Source B&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_B_ROLE_ARN<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_B_RDS_IDENTIFIER<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_B_SECRET_ARN<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_B_DB_NAME<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$TARGET_B_DB_NAME<span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">&#34;</span>$SOURCE_B_REGION<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;ALL MIGRATIONS COMPLETED.&#34;</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Run the Script</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x migrate_dbs.sh
+</span></span><span style="display:flex;"><span>./migrate_dbs.sh
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="phase-4-post-migration-validation">Phase 4: Post-Migration Validation</h3>
+<p>Always verify your work.</p>
+<ol>
+<li><strong>Connect to the Target RDS</strong>: Use <code>psql</code> to connect to your new consolidated instance.</li>
+<li><strong>Check Databases</strong>: List all databases to ensure <code>app_db_a</code> and <code>app_db_b</code> are present (<code>\l</code>).</li>
+<li><strong>Inspect Data</strong>: Connect to each new database (<code>\c app_db_a</code>) and inspect the tables (<code>\dt</code>). Run a few <code>SELECT count(*)</code> queries on important tables to ensure data has been transferred correctly.</li>
+<li><strong>Check Ownership and Permissions</strong>: <code>pg_dump</code> preserves ownership information. If the original user roles don&rsquo;t exist on the target RDS, the objects will be owned by the master user. You may need to create the necessary roles and <code>GRANT</code> permissions manually after the migration.</li>
+</ol>
+<h2 id="final-considerations">Final Considerations</h2>
+<ul>
+<li><strong>Rollback Plan</strong>: Your safest rollback path is the original source RDS instances. Do not decommission them until the new consolidated instance has been fully tested and validated by your application teams.</li>
+<li><strong>Large Databases</strong>: For extremely large databases (hundreds of gigabytes or more), this <code>pg_dump</code> method can be slow and require significant disk space on the migration host. For those cases, consider using the AWS Database Migration Service (DMS).</li>
+<li><strong>Cleanup</strong>: Once the migration is complete and verified, remember to terminate the EC2 migration host to save costs and remove the temporary IAM Roles and Policies if they are no longer needed.</li>
+</ul>
+<p>Congratulations! You have successfully consolidated your RDS instances, simplifying your non-production environment and potentially saving on operational costs.</p>
+
+</article>
+
+                </div>
+            </div>
+        </main>
+        <canvas id="bg-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;"></canvas>
+<script type="importmap">
+{ "imports": { "three": "https://esm.sh/three@0.162.0" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const bgColor = getComputedStyle(document.body).backgroundColor || '#000';
+const SHAPES = ['box', 'tetra', 'octa', 'torus', 'ring'];
+
+let scene, camera, renderer;
+let objects = [];
+let particles;
+let mouseX = 0, mouseY = 0;
+let width = window.innerWidth;
+let height = window.innerHeight;
+
+const canvas = document.getElementById('bg-canvas');
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function randColor() {
+    const hue = Math.random() * 360;
+    return `hsl(${hue}, 70%, 60%)`;
+}
+
+function randGeometry() {
+    switch (SHAPES[Math.floor(Math.random() * SHAPES.length)]) {
+        case 'box': return new THREE.BoxGeometry(1, 1, 1);
+        case 'tetra': return new THREE.TetrahedronGeometry(0.8);
+        case 'octa': return new THREE.OctahedronGeometry(0.7);
+        case 'torus': return new THREE.TorusGeometry(0.6, 0.2, 8, 12);
+        case 'ring': return new THREE.TorusKnotGeometry(0.5, 0.15, 48, 8);
+    }
+}
+
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(bgColor);
+    scene.fog = new THREE.FogExp2(bgColor, 0.02);
+
+    camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 150);
+    camera.position.z = 35;
+
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    createObjects();
+    createParticles();
+
+    window.addEventListener('resize', onResize);
+    document.addEventListener('mousemove', onMouse);
+    requestAnimationFrame(animate);
+}
+
+function createObjects() {
+    const count = 20 + Math.floor(Math.random() * 15);
+    for (let i = 0; i < count; i++) {
+        const group = new THREE.Group();
+        const geo = randGeometry();
+        const color = randColor();
+        const edgesGeo = new THREE.EdgesGeometry(geo);
+
+        const faceMat = new THREE.MeshBasicMaterial({
+            color, transparent: true, opacity: 0.06 + Math.random() * 0.04, depthWrite: false
+        });
+        group.add(new THREE.Mesh(geo, faceMat));
+
+        const edgeMat = new THREE.LineBasicMaterial({
+            color, transparent: true, opacity: 0.2 + Math.random() * 0.2, depthWrite: false
+        });
+        group.add(new THREE.LineSegments(edgesGeo, edgeMat));
+
+        const x = (Math.random() - 0.5) * 60;
+        const y = (Math.random() - 0.5) * 40;
+        const z = (Math.random() - 0.5) * 30;
+        group.position.set(x, y, z);
+        group.scale.setScalar(0.3 + Math.random() * 1.5);
+
+        group.userData = {
+            origin: new THREE.Vector3(x, y, z),
+            phase: Math.random() * Math.PI * 2,
+            rotSpeed: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.004,
+                (Math.random() - 0.5) * 0.004,
+                (Math.random() - 0.5) * 0.002
+            ),
+            bobSpeed: 0.2 + Math.random() * 0.5,
+            bobAmp: 0.3 + Math.random() * 2,
+            driftAmp: 0.2 + Math.random() * 0.6,
+        };
+
+        scene.add(group);
+        objects.push(group);
+    }
+}
+
+function createParticles() {
+    const count = 100;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+        pos[i * 3] = (Math.random() - 0.5) * 70;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * 50;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+        const c = new THREE.Color(randColor());
+        colors[i * 3] = c.r;
+        colors[i * 3 + 1] = c.g;
+        colors[i * 3 + 2] = c.b;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const c = document.createElement('canvas');
+    c.width = c.height = 4;
+    c.getContext('2d').fillStyle = '#fff';
+    c.getContext('2d').fillRect(0, 0, 4, 4);
+    const tex = new THREE.CanvasTexture(c);
+    tex.magFilter = THREE.NearestFilter;
+
+    particles = new THREE.Points(geo, new THREE.PointsMaterial({
+        size: 0.2, map: tex, transparent: true, opacity: 0.4,
+        depthWrite: false, sizeAttenuation: true, vertexColors: true,
+    }));
+    scene.add(particles);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const speed = reduced ? 0.1 : 1.0;
+    const t = performance.now() * 0.001 * speed;
+
+    for (const obj of objects) {
+        const d = obj.userData;
+        obj.position.y = d.origin.y + Math.sin(t * d.bobSpeed + d.phase) * d.bobAmp;
+        obj.position.x = d.origin.x + Math.cos(t * 0.25 + d.phase) * d.driftAmp;
+        obj.rotation.x += d.rotSpeed.x * speed;
+        obj.rotation.y += d.rotSpeed.y * speed;
+        obj.rotation.z += d.rotSpeed.z * speed;
+        const edge = obj.children[1];
+        if (edge?.material) {
+            edge.material.opacity = 0.2 + Math.sin(t * 1.2 + d.phase) * 0.1;
+        }
+    }
+
+    if (particles) {
+        const pos = particles.geometry.attributes.position.array;
+        for (let i = 0; i < pos.length; i += 3) {
+            pos[i + 1] += 0.006 * speed;
+            if (pos[i + 1] > 25) pos[i + 1] = -25;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    if (!reduced) {
+        camera.position.x += (mouseX * 1.0 - camera.position.x) * 0.02;
+        camera.position.y += (-mouseY * 0.6 - camera.position.y) * 0.02;
+        camera.lookAt(scene.position);
+    }
+
+    renderer.render(scene, camera);
+}
+
+function onResize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
+
+function onMouse(e) {
+    mouseX = (e.clientX / width) * 2 - 1;
+    mouseY = (e.clientY / height) * 2 - 1;
+}
+
+init();
+</script>
+
+    </body></html>
