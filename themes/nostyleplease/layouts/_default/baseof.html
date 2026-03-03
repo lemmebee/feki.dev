@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="{{ $.Site.LanguageCode }}">
+    {{- partial "head.html" . -}}
+    <body a="{{ $.Site.Params.theme_config.appearance | default "auto" }}">
+        <main class="page-content" aria-label="Content">
+            <div class="content-panel">
+                <div class="w">
+                    {{- block "main" . }}{{- end }}
+                    {{ partial "footer.html" }}
+                </div>
+            </div>
+        </main>
+        {{ partial "bg_animation.html" . }}
+    </body>
+</html>
