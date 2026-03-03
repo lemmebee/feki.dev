@@ -1,0 +1,23 @@
+[[entries]]
+title = "info"
+
+  [[entries.entries]]
+  title = "about me"
+  url = "about/"
+
+  [[entries.entries]]
+  title = "github"
+  url = "https://github.com/lemmebee"
+
+  [[entries.entries]]
+  title = "linkedin"
+  url = "https://www.linkedin.com/in/ehab-elfeki-137025148/"
+
+[[entries]]
+title = "all posts"
+
+  [entries.post_list]
+  limit = 5
+  show_more = true
+  show_more_text = "See archive..."
+  show_more_url = "posts"
