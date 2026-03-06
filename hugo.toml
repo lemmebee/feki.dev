@@ -5,6 +5,7 @@ theme = "nostyleplease"
 
 [params]
   author = "Ehab ELFEKI"
+  favicon = "favicon.svg"
   
   [params.theme_config]
     appearance = "dark" # valid options: light, dark, auto

@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on feki.dev</title>
-    <link>https://lemmebee.github.io/feki.dev/posts/</link>
+    <link>http://localhost:1313/feki.dev/posts/</link>
     <description>Recent content in Posts on feki.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 28 Aug 2025 21:14:07 +0200</lastBuildDate>
-    <atom:link href="https://lemmebee.github.io/feki.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/feki.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance</title>
-      <link>https://lemmebee.github.io/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</link>
+      <link>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</link>
       <pubDate>Thu, 28 Aug 2025 21:14:07 +0200</pubDate>
-      <guid>https://lemmebee.github.io/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</guid>
+      <guid>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</guid>
       <description>Table of Contents The Scenario Our Architecture Prerequisites The Migration Strategy: Why pg_dump and pg_restore? Step-by-Step Migration Guide Phase 1: Preparing the Target (Non-Prod) Account Phase 2: Preparing the Source Accounts (A &amp;amp; B) Phase 3: Executing the Migration Script Phase 4: Post-Migration Validation Final Considerations As organizations grow, it&amp;rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs.</description>
     </item>
     <item>
       <title>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</title>
-      <link>https://lemmebee.github.io/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link>
+      <link>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link>
       <pubDate>Fri, 25 Apr 2025 20:30:56 +0200</pubDate>
-      <guid>https://lemmebee.github.io/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</guid>
+      <guid>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</guid>
       <description>Table of Contents The Problem The Key Challenge Failed Approaches The Solution: Child Pipelines How the Solution Works Key Advantages Gotchas and Lessons Learned Conclusion In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&amp;rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.</description>
     </item>
     <item>
       <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
-      <link>https://lemmebee.github.io/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
+      <link>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
       <pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate>
-      <guid>https://lemmebee.github.io/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
+      <guid>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
       <description>tl;dr: Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&#xA;Table of contents The Challenge: When Templates Become Obstacles The Transformation: Introducing a Modular, Language-Agnostic Architecture 1. Modular Design with include 2.</description>
     </item>
   </channel>
