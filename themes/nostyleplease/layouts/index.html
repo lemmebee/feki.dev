@@ -1,12 +1,103 @@
 {{ define "main" }}
 
 <header>
-    <h1>{{ $.Site.Title }}</h1>
+    <h1 class="glitch-text">{{ $.Site.Title }}</h1>
     {{- if $.Site.Params.theme_config.show_description -}}
         <p>{{ $.Site.Params.description }}</p>
     {{- end -}}
 </header>
-{{ .Content }}
+<p class="glitch-text">I turn coffee into automated deployments.</p>
 {{ partial "menu_item.html" (dict "context" . "collection" $.Site.Data.menu.entries) }}
+
+<style>
+.glitch-text .glitch-char {
+    display: inline-block;
+    position: relative;
+}
+
+.glitch-text .glitch-char.space {
+    width: 0.3em;
+}
+
+.glitch-text .glitch-char.glitching {
+    animation: glitchChar 0.15s steps(2) forwards;
+    color: #0f0;
+    text-shadow:
+        -1px 0 #f00,
+        1px 0 #0ff;
+}
+
+@keyframes glitchChar {
+    0% { transform: translate(2px, -1px) skewX(10deg); opacity: 0.8; }
+    25% { transform: translate(-2px, 1px) skewX(-5deg); opacity: 0.6; }
+    50% { transform: translate(1px, 2px) skewX(3deg); opacity: 0.9; }
+    75% { transform: translate(-1px, -2px) skewX(-8deg); opacity: 0.7; }
+    100% { transform: translate(0, 0) skewX(0deg); opacity: 1; color: inherit; text-shadow: none; }
+}
+</style>
+
+<script>
+(function() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const els = document.querySelectorAll('.glitch-text');
+    const chars = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    els.forEach(function(el) {
+        const text = el.textContent;
+        el.innerHTML = '';
+        const spans = [];
+
+        for (var i = 0; i < text.length; i++) {
+            var span = document.createElement('span');
+            span.className = 'glitch-char';
+            if (text[i] === ' ') {
+                span.innerHTML = '&nbsp;';
+                span.classList.add('space');
+            } else {
+                span.textContent = text[i];
+            }
+            span.dataset.original = text[i];
+            el.appendChild(span);
+            spans.push(span);
+        }
+
+        function glitchRandom() {
+            var count = Math.floor(Math.random() * 3) + 1;
+            for (var j = 0; j < count; j++) {
+                var idx = Math.floor(Math.random() * spans.length);
+                var s = spans[idx];
+                if (s.dataset.original === ' ') continue;
+
+                s.classList.add('glitching');
+                var iterations = 0;
+                var maxIterations = 3 + Math.floor(Math.random() * 4);
+                (function(s, maxIterations) {
+                    var it = 0;
+                    var scramble = setInterval(function() {
+                        s.textContent = chars[Math.floor(Math.random() * chars.length)];
+                        it++;
+                        if (it >= maxIterations) {
+                            clearInterval(scramble);
+                            s.textContent = s.dataset.original;
+                            s.classList.remove('glitching');
+                        }
+                    }, 50);
+                })(s, maxIterations);
+            }
+        }
+
+        function scheduleGlitch() {
+            var delay = 1000 + Math.random() * 1500;
+            setTimeout(function() {
+                glitchRandom();
+                scheduleGlitch();
+            }, delay);
+        }
+        glitchRandom();
+        scheduleGlitch();
+    });
+})();
+</script>
 
 {{ end }}
