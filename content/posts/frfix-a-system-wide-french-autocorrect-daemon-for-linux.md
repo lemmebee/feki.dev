@@ -1,5 +1,5 @@
 +++
-date = '2026-05-19T21:00:00+02:00'
+date = '2026-05-19T09:00:00+02:00'
 draft = false
 title = 'frfix: A System-Wide French Autocorrect Daemon for Linux'
 +++
