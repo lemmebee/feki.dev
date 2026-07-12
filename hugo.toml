@@ -1,14 +1,26 @@
-baseURL = "https://lemmebee.github.io/feki.dev/"
-languageCode = "en-us"
+baseURL = "https://feki.dev/"
 title = "feki.dev"
 theme = "nostyleplease"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
 
 [params]
   author = "Ehab ELFEKI"
   favicon = "favicon.svg"
-  
+
   [params.theme_config]
     appearance = "dark" # valid options: light, dark, auto
     back_home_text = "← home"
     date_format = "2006-01-02"
     show_description = true
+    isShowFooter = true
+
+[languages]
+  [languages.en]
+    languageCode = "en-us"
+    languageName = "English"
+    weight = 1
+  [languages.fr]
+    languageCode = "fr-fr"
+    languageName = "Français"
+    weight = 2

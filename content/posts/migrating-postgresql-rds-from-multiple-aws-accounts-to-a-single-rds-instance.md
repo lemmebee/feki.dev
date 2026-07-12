@@ -1,7 +1,7 @@
 +++
 date = '2025-08-28T21:14:07+02:00'
 draft = false
-title = 'Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance'
+title = 'Migrating PostgreSQL RDS from Multiple AWS Accounts to a Single Instance'
 +++
 # Table of Contents
 - [The Scenario](#the-scenario)

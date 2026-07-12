@@ -1,0 +1,32 @@
+{{- $to := "" -}}
+{{- if eq site.Language.Lang "fr" -}}
+  {{- range .Translations -}}{{- if eq .Language.Lang "en" -}}{{- $to = .RelPermalink -}}{{- end -}}{{- end -}}
+  {{- if not $to -}}{{- $to = "/" -}}{{- end -}}
+{{- else -}}
+  {{- range .Translations -}}{{- if eq .Language.Lang "fr" -}}{{- $to = .RelPermalink -}}{{- end -}}{{- end -}}
+  {{- if not $to -}}{{- $to = "/fr/" -}}{{- end -}}
+{{- end -}}
+<a class="lang-switch" href="{{ $to }}" title="{{ if eq site.Language.Lang "fr" }}Read in English{{ else }}Lire en français{{ end }}" aria-label="switch language">🥐</a>
+
+<style>
+.lang-switch {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 30;
+    display: inline-block;
+    font-size: 1.4rem;
+    line-height: 1;
+    text-decoration: none;
+    transform-origin: center;
+    animation: baguetteDrift 3.2s ease-in-out infinite;
+}
+.lang-switch:hover { animation-play-state: paused; }
+@keyframes baguetteDrift {
+    0%, 100% { transform: translateX(0) rotate(-4deg); }
+    50%      { transform: translateX(6px) rotate(-4deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .lang-switch { animation: none; }
+}
+</style>

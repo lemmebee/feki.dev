@@ -166,9 +166,9 @@
 <div class="terminal">
   <div class="terminal-header">
     <div class="terminal-controls">
-      <a href="/" class="terminal-home-link">← home</a>
+      <a href="{{ if eq site.Language.Lang "fr" }}/fr/{{ else }}/{{ end }}" class="terminal-home-link">{{ if eq site.Language.Lang "fr" }}← accueil{{ else }}← home{{ end }}</a>
     </div>
-    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ about-me</div>
+    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ {{ if eq site.Language.Lang "fr" }}a-propos{{ else }}about-me{{ end }}</div>
   </div>
   <div class="terminal-body">
     <div class="command-block">
@@ -176,7 +176,15 @@
         <span class="command">ehab@elfeki:~$ whoami</span>
       </div>
       <div class="about-text">
-        Platform Engineering professional specializing in AWS infrastructure, CI/CD automation, and Kubernetes orchestration. I architect scalable systems that drive operational excellence, from implementing observability solutions to designing modular infrastructure-as-code patterns.
+        {{ if eq site.Language.Lang "fr" }}
+        Ingénieur avec 8 ans d'expérience en développement logiciel, automatisation des tests et cloud. Je construis les systèmes sur lesquels les équipes livrent : déploiement GitOps, CI/CD réutilisable, Kubernetes et infrastructure AWS.<br><br>
+        Travaux récents (ORIS, Contentsquare) : réduction des coûts cloud par consolidation multi-comptes, migration d'une flotte de microservices vers un workflow GitOps Helm/ArgoCD, refonte de la CI/CD en templates GitLab réutilisables avec détection automatique de projet, et consolidation de PostgreSQL RDS entre comptes. Ancré dans l'automatisation des tests et le développement backend, je construis des plateformes avec des quality gates et un feedback rapide intégrés dès le départ.<br><br>
+        Stack principale : AWS, Kubernetes, Terraform, AWS CDK, GitLab CI / GitHub Actions, Docker, ArgoCD, Python, Go, TypeScript.
+        {{ else }}
+        Engineer with 8 years across software engineering, test automation, and cloud. I build the systems teams ship through: GitOps delivery, reusable CI/CD, Kubernetes, and AWS infrastructure.<br><br>
+        Recent work (ORIS, Contentsquare): cut cloud costs through multi-account consolidation, moved a microservice fleet to a Helm/ArgoCD GitOps workflow, re-architected CI/CD into reusable GitLab templates with automatic project detection, and consolidated PostgreSQL RDS across accounts. Rooted in test automation and backend engineering, I build platforms with quality gates and fast feedback designed in from the start.<br><br>
+        Core stack: AWS, Kubernetes, Terraform, AWS CDK, GitLab CI / GitHub Actions, Docker, ArgoCD, Python, Go, TypeScript.
+        {{ end }}
       </div>
     </div>
     
@@ -185,7 +193,7 @@
         <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
       </div>
       <div class="about-text">
-        Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.
+        {{ if eq site.Language.Lang "fr" }}En dehors de la tech, je décroche en retenant ma respiration et en plongeant le plus profond possible dans la mer.{{ else }}Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.{{ end }}
       </div>
     </div>
 
@@ -196,7 +204,7 @@
       <div class="about-text">
         <div class="skills-grid">
           <div class="skills-column">
-            <div class="category">Automation</div>
+            <div class="category">{{ if eq site.Language.Lang "fr" }}Automatisation{{ else }}Automation{{ end }}</div>
             <div class="skill-item">GitLab-CI</div>
             <div class="skill-item">GitHub-Actions</div>
             <div class="skill-item">Jenkins</div>
@@ -207,25 +215,29 @@
             <div class="category">Cloud</div>
             <div class="skill-item">AWS</div>
             <div class="skill-item">Kubernetes</div>
+            <div class="category">{{ if eq site.Language.Lang "fr" }}Sécurité{{ else }}Security{{ end }}</div>
+            <div class="skill-item">Trivy</div>
+            <div class="skill-item">SonarQube</div>
+            <div class="skill-item">Security-Hub</div>
           </div>
           <div class="skills-column">
-            <div class="category">Monitoring</div>
+            <div class="category">{{ if eq site.Language.Lang "fr" }}Supervision{{ else }}Monitoring{{ end }}</div>
             <div class="skill-item">Datadog</div>
             <div class="skill-item">ELK</div>
             <div class="skill-item">Grafana</div>
             <div class="skill-item">Prometheus</div>
-            <div class="category">Programming</div>
+            <div class="category">{{ if eq site.Language.Lang "fr" }}Programmation{{ else }}Programming{{ end }}</div>
             <div class="skill-item">Go</div>
             <div class="skill-item">Python</div>
             <div class="skill-item">TypeScript</div>
-            <div class="skill-item">Java</div>
             <div class="skill-item">Bash</div>
-          </div>
-          <div class="skills-column">
-            <div class="category">Security</div>
-            <div class="skill-item">Trivy</div>
-            <div class="skill-item">SonarQube</div>
-            <div class="skill-item">Security-Hub</div>
+            <div class="category">{{ if eq site.Language.Lang "fr" }}Qualité{{ else }}Quality{{ end }}</div>
+            <div class="skill-item">Selenium</div>
+            <div class="skill-item">Cypress</div>
+            <div class="skill-item">Pytest</div>
+            <div class="skill-item">Serenity-BDD</div>
+            <div class="skill-item">Cucumber</div>
+            <div class="skill-item">TestRail</div>
           </div>
         </div>
       </div>
@@ -233,13 +245,14 @@
 
     <div class="command-block">
       <div class="prompt">
-        <span class="command">ehab@elfeki:~$ docker --version && kubectl version --client && terraform --version && helm version --short</span>
+        <span class="command">ehab@elfeki:~$ command -v docker kubectl terraform helm argocd</span>
       </div>
       <div class="about-text">
-        Docker version 24.0.5, build ced0996<br>
-        Client Version: v1.28.2<br>
-        Terraform v1.7.0<br>
-        v3.13.1
+        /usr/local/bin/docker<br>
+        /usr/local/bin/kubectl<br>
+        /usr/local/bin/terraform<br>
+        /usr/local/bin/helm<br>
+        /usr/local/bin/argocd
       </div>
     </div>
 

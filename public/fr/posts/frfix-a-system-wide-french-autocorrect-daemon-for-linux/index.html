@@ -1,0 +1,232 @@
+<!doctype html><html lang=fr-fr><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="tl;dr : les navigateurs web, les applications de messagerie et les IDE embarquent chacun leur propre correcteur orthographique, sauf votre terminal, votre application de notes protégée par mot de passe et la moitié des outils de niche que vous utilisez vraiment tous les jours. frfix est un petit démon Python qui lit les frappes clavier via evdev, les passe à travers hunspell et grammalecte, et réécrit silencieusement les fautes de français partout sous Linux/X11. Aucune extension, aucune astuce de presse-papiers, aucun moteur de méthode de saisie. Source : github.com/lemmebee/frfix."><title>frfix : un démon de correction orthographique du français au niveau système pour Linux
+</title><link rel=icon type=image/svg+xml href=/favicon.svg><link rel=stylesheet href=/css/main.d499914323e776e485152cdcc4d5c355b74c60b9e2c8c8ced52f58ea5d76273c87791ad104417ac0400275a6f3e8d8c10b627d1be32259a82544fbc8db04b2a6.css integrity="sha512-1JmRQyPnduSFFSzcxNXDVbdMYLniyMjO1S9Y6l12JzyHeRrRBEF6wEACdabz6NjBC2J9G+MiWaglRPvI2wSypg=="></head><body a=dark><a class=lang-switch href=/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/ title="Read in English" aria-label="switch language">🥐</a><style>.lang-switch{position:absolute;top:1rem;right:1rem;z-index:30;display:inline-block;font-size:1.4rem;line-height:1;text-decoration:none;transform-origin:center;animation:baguetteDrift 3.2s ease-in-out infinite}.lang-switch:hover{animation-play-state:paused}@keyframes baguetteDrift{0%,100%{transform:translateX(0)rotate(-4deg)}50%{transform:translateX(6px)rotate(-4deg)}}@media(prefers-reduced-motion:reduce){.lang-switch{animation:none}}</style><main class=page-content aria-label=Content><div class=content-panel><div class=w><div class=post-meta><a href=/fr/>← accueil</a><p><time datetime="2026-05-19 09:00:00 +0200 +0200">2026-05-19</time></p></div><article><h1>frfix : un démon de correction orthographique du français au niveau système pour Linux</h1><p><strong>tl;dr :</strong> les navigateurs web, les applications de messagerie et les IDE embarquent chacun leur propre correcteur orthographique, sauf votre terminal, votre application de notes protégée par mot de passe et la moitié des outils de niche que vous utilisez vraiment tous les jours. <code>frfix</code> est un petit démon Python qui lit les frappes clavier via <code>evdev</code>, les passe à travers <code>hunspell</code> et <code>grammalecte</code>, et réécrit silencieusement les fautes de français partout sous Linux/X11. Aucune extension, aucune astuce de presse-papiers, aucun moteur de méthode de saisie. Source : <a href=https://github.com/lemmebee/frfix>github.com/lemmebee/frfix</a>.</p><hr><h2 id=table-des-matières>Table des matières</h2><ul><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#le-probleme-la-correction-orthographique-sarrete-a-la-frontiere-de-lapplication>Le problème : la correction orthographique s&rsquo;arrête à la frontière de l&rsquo;application</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#lidee-une-correction-qui-agit-au-lieu-de-souligner>L&rsquo;idée : une correction qui agit au lieu de souligner</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#ce-quil-corrige>Ce qu&rsquo;il corrige</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#comment-ca-fonctionne>Comment ça fonctionne</a><ul><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#1-lire-les-frappes-clavier-avec-evdev>1. Lire les frappes clavier avec <code>evdev</code></a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#2-traduire-les-keycodes-via-x11xkb>2. Traduire les keycodes via X11/xkb</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#3-construire-des-mots-et-des-phrases>3. Construire des mots et des phrases</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#4-corriger-avec-hunspell--grammalecte>4. Corriger avec hunspell + grammalecte</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#5-injecter-la-correction-avec-xdotool>5. Injecter la correction avec <code>xdotool</code></a></li></ul></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#pourquoi-x11-uniquement-et-pas-wayland>Pourquoi X11 uniquement (et pas Wayland)</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#securite-les-secrets-que-vous-tapez-doivent-le-rester>Sécurité : les secrets que vous tapez doivent le rester</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#installation-et-lancement>Installation et lancement</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#configuration>Configuration</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#limites-et-compromis-assumes>Limites et compromis assumés</a></li><li><a href=/fr/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#la-suite>La suite</a></li></ul><h2 id=le-problème--la-correction-orthographique-sarrête-à-la-frontière-de-lapplication>Le problème : la correction orthographique s&rsquo;arrête à la frontière de l&rsquo;application</h2><p>Écrire en français sous Linux, c&rsquo;est une accumulation de petites irritations. Firefox corrige automatiquement, l&rsquo;éditeur de texte de GNOME souligne, Slack en attrape la moitié. Puis vous basculez vers un terminal, une application Tauri, un outil Electron qui a désactivé la correction orthographique, une session SSH, un formulaire React personnalisé avec <code>spellcheck="false"</code>, ou un widget GTK que personne n&rsquo;a pris la peine de câbler, et vous revoilà à taper <code>francais</code> et <code>cest</code> en faisant comme si personne n&rsquo;avait remarqué.</p><p>Chaque application réinvente la correction orthographique. La plupart le font mal. Beaucoup s&rsquo;en passent complètement. Résultat : vous traînez la même charge mentale du « pense aux accents » dans chaque champ de texte du système, et votre mémoire musculaire perd quand même.</p><p>Je voulais que la correction orthographique soit une propriété du <strong>clavier</strong>, pas de l&rsquo;<strong>application</strong>.</p><h2 id=lidée--une-correction-qui-agit-au-lieu-de-souligner>L&rsquo;idée : une correction qui agit au lieu de souligner</h2><p><code>frfix</code> est un démon d&rsquo;arrière-plan. Il fait trois choses en boucle :</p><ol><li>Il surveille les frappes clavier à l&rsquo;échelle du système via <code>/dev/input</code>.</li><li>Il maintient un petit tampon de mot/phrase.</li><li>Quand un mot se termine (espace, ponctuation, Entrée), il vérifie le mot/la phrase avec hunspell et grammalecte. Si c&rsquo;est fautif, il le réécrit sur place : retour arrière × N, puis frappe de la correction.</li></ol><p>Il n&rsquo;y a aucune interface avec laquelle interagir. Il n&rsquo;y a aucune intégration applicative. Il ne sait pas quelle fenêtre a le focus, au-delà d&rsquo;une vérification d&rsquo;exclusion. Il reste simplement là, vous regarde taper, et corrige les fautes à l&rsquo;instant même où le mot se termine, dans le terminal, dans <code>vim</code>, dans une application Electron qui a désactivé la correction, dans <code>xterm</code>, partout.</p><p>Voyez-le comme un correcteur orthographique uniquement français, à l&rsquo;échelle du système, qui <em>agit</em> au lieu de souligner.</p><h2 id=ce-quil-corrige>Ce qu&rsquo;il corrige</h2><p>Les quatre catégories qui couvrent environ 95 % des fautes de frappe françaises du quotidien :</p><ul><li><strong>Accents manquants</strong> : <code>francais</code> → <code>français</code>, <code>realite</code> → <code>réalité</code>, <code>ecran</code> → <code>écran</code>, <code>etre</code> → <code>être</code>.</li><li><strong>Élisions</strong> : <code>cest</code> → <code>c'est</code>, <code>jai</code> → <code>j'ai</code>, <code>lhomme</code> → <code>l'homme</code>, <code>cetait</code> → <code>c'était</code>, <code>quil</code> → <code>qu'il</code>. La classe de faute la plus agaçante quand on vient d&rsquo;un layout anglais où l&rsquo;apostrophe est mal placée.</li><li><strong>Inversions AZERTY/QWERTY</strong> : <code>vrqi</code> → <code>vrai</code>, <code>fqire</code> → <code>faire</code>, <code>voulqis</code> → <code>voulais</code>. Le grand classique du « j&rsquo;ai oublié quel layout était actif ».</li><li><strong>Grammaire en fin de phrase</strong> : <code>tu peut</code> → <code>tu peux</code>, <code>je veut</code> → <code>je veux</code>, les petits accords simples. Pris en charge par grammalecte une fois la phrase terminée.</li></ul><p>Il y a aussi une <strong>annulation</strong> : <code>Ctrl+Z</code> immédiatement après une correction la révoque. Un petit tampon circulaire garde en mémoire les dernières corrections pour que vous puissiez revenir en arrière si frfix se trompe.</p><p>Le système est <strong>conservateur par conception</strong> : si un mot est déjà un mot français valide, rien ne se passe. Les faux positifs sont l&rsquo;ennemi. Un correcteur qui réécrit ce que vous avez tapé volontairement est pire que pas de correcteur du tout.</p><h2 id=comment-ça-fonctionne>Comment ça fonctionne</h2><pre tabindex=0><code>                ┌──────────┐    keysym +    ┌──────────┐
+   /dev/input ─▶│  evdev   │───keycode ────▶│ KeyTrans │
+                │ capture  │  (read-only)   │  X11/xkb │
+                └──────────┘                └────┬─────┘
+                                                 │ char
+                                                 ▼
+                              ┌───────────────────────────────┐
+                              │ TextBuffer (word + sentence)  │
+                              └────────────┬──────────────────┘
+                                           │ word / sentence
+                                           ▼
+                              ┌───────────────────────────────┐
+                              │ FrenchCorrector               │
+                              │  • hunspell (spelling)        │
+                              │  • grammalecte (grammar)      │
+                              │  • user dictionary            │
+                              └────────────┬──────────────────┘
+                                           │ replacement
+                                           ▼
+                              ┌───────────────────────────────┐
+                              │ Injector (xdotool)            │
+                              │  backspace × N + type fix     │
+                              └───────────────────────────────┘
+</code></pre><h3 id=1-lire-les-frappes-clavier-avec-evdev>1. Lire les frappes clavier avec <code>evdev</code></h3><p>Linux expose les périphériques de saisie sous <code>/dev/input/event*</code>. Avec l&rsquo;appartenance au groupe <code>input</code>, un processus peut ouvrir ces fichiers en lecture seule et recevoir chaque événement clavier que le noyau voit, indépendamment du serveur X, du compositeur ou de l&rsquo;application ayant le focus. <code>python-evdev</code> enveloppe cela dans un itérateur asynchrone.</p><p>Point crucial : il s&rsquo;agit d&rsquo;une <strong>capture passive</strong>. Il n&rsquo;y a aucun keyboard grab. Toutes les autres applications reçoivent chaque touche normalement. frfix est un observateur silencieux, pas un intermédiaire.</p><h3 id=2-traduire-les-keycodes-via-x11xkb>2. Traduire les keycodes via X11/xkb</h3><p><code>evdev</code> vous donne des keycodes Linux bruts (<code>KEY_A</code>, <code>KEY_SEMICOLON</code>, …). Ceux-ci sont inutiles à eux seuls : la même touche physique produit <code>q</code> en AZERTY et <code>a</code> en QWERTY. Pour savoir quel caractère a réellement été tapé, frfix interroge le <strong>layout xkb actif</strong> via X11 et résout keycode → keysym → caractère à travers la table du layout.</p><p>C&rsquo;est ce qui lui permet de gérer correctement un utilisateur qui bascule entre QWERTY et AZERTY en cours de session : la même <code>KEY_Q</code> produit <code>q</code> ou <code>a</code> selon le layout que xkb déclare actif à l&rsquo;instant présent.</p><p>Par défaut, frfix ne s&rsquo;exécute que lorsque le layout courant est <code>fr</code>. Au démarrage, il bascule vers <code>fr</code> et mémorise votre layout précédent ; à la sortie, il le restaure. (Vous pouvez outrepasser ce comportement avec <code>--no-layout-check</code> ou <code>--force-layout</code>.)</p><h3 id=3-construire-des-mots-et-des-phrases>3. Construire des mots et des phrases</h3><p>Un <code>TextBuffer</code> conserve deux éléments d&rsquo;état :</p><ul><li>Le <strong>mot courant</strong>, qui grandit caractère par caractère.</li><li>La <strong>phrase courante</strong>, qui s&rsquo;accumule à travers les frontières de mots.</li></ul><p>Les frontières de mots (espace, tabulation, ponctuation, Entrée) déclenchent les vérifications orthographiques. Les frontières de phrases (<code>.</code>, <code>!</code>, <code>?</code>) déclenchent les vérifications grammaticales. Le retour arrière raccourcit le mot courant. Le tampon est réinitialisé lors des changements de focus et lors des corrections injectées (pour que frfix n&rsquo;essaie pas de « corriger » récursivement sa propre correction).</p><h3 id=4-corriger-avec-hunspell--grammalecte>4. Corriger avec hunspell + grammalecte</h3><p>Deux couches de vérification, dans cet ordre :</p><ul><li><strong><code>hunspell</code> + <code>hunspell-fr-comprehensive</code></strong> pour les vérifications au niveau du mot. Si le mot est du français valide, ne rien faire. Sinon, générer des candidats avec le moteur de suggestion de hunspell, plus des règles ciblées pour les cas fréquents (accent manquant sur un radical connu, apostrophe manquante après <code>c</code>/<code>j</code>/<code>l</code>/<code>qu</code>/<code>d</code>/<code>n</code>/<code>s</code>/<code>t</code>, substitution AZERTY/QWERTY).</li><li><strong><code>grammalecte</code></strong> (optionnel, via GObject Introspection) pour la grammaire au niveau de la phrase. Il attrape les petits accords de verbe que hunspell ne peut pas voir parce que chaque mot pris isolément est valide.</li></ul><p>Un dictionnaire utilisateur situé à <code>~/.config/frfix/dictionary.txt</code> est consulté en premier. Tout ce qui s&rsquo;y trouve est traité comme un mot français valide et n&rsquo;est jamais corrigé. Mettez-y les noms propres, les noms de marques et le jargon.</p><h3 id=5-injecter-la-correction-avec-xdotool>5. Injecter la correction avec <code>xdotool</code></h3><p>Quand une correction se déclenche, frfix synthétise des événements de saisie via <code>xdotool</code> :</p><ol><li><code>xdotool key BackSpace</code> × <code>len(original)</code> pour supprimer ce que l&rsquo;utilisateur a tapé.</li><li><code>xdotool type --</code> <em>remplacement</em> pour taper la correction.</li></ol><p><code>xdotool</code> fonctionne uniquement sous X11. Il parle XTEST au serveur X. L&rsquo;injection atterrit dans la fenêtre qui a actuellement le focus clavier, exactement comme si l&rsquo;utilisateur l&rsquo;avait tapée. L&rsquo;application qui reçoit les touches ne peut pas faire la différence entre un humain et <code>xdotool</code>, ce qui constitue à la fois la force et le point faible de cette conception.</p><h2 id=pourquoi-x11-uniquement-et-pas-wayland>Pourquoi X11 uniquement (et pas Wayland)</h2><p>Deux couches de la conception requièrent des capacités que Wayland retire délibérément :</p><ul><li><strong>Capture globale des frappes.</strong> Sous Wayland, seule l&rsquo;application ayant le focus reçoit les événements clavier. Il n&rsquo;existe aucun équivalent à la lecture de <code>/dev/input</code> au niveau du protocole (vous pouvez toujours le faire au niveau du périphérique, mais la traduction du layout casse, car il n&rsquo;y a pas d&rsquo;équivalent à la requête <code>xkb</code>). C&rsquo;est une fonctionnalité de sécurité, pas un bug.</li><li><strong>Injection globale des frappes.</strong> Wayland n&rsquo;a aucun équivalent à XTEST. <code>xdotool</code> ne fonctionne pas. Des outils comme <code>ydotool</code> fonctionnent via <code>/dev/uinput</code>, mais la plupart des compositeurs les empêchent d&rsquo;injecter dans les surfaces ayant le focus des autres applications.</li></ul><p><code>frfix</code> s&rsquo;exécute donc <strong>uniquement sous X11</strong>. Si vous êtes sur un bureau GNOME-sur-Wayland, basculez votre session vers Xorg à l&rsquo;écran de connexion (l&rsquo;icône d&rsquo;engrenage sur l&rsquo;invite de connexion).</p><p>Ce n&rsquo;est pas un état temporaire. Le chemin le plus propre vers la prise en charge de Wayland est un portail. Un portail de bureau XDG pour « la correction de saisie à l&rsquo;échelle du système » n&rsquo;existe pas encore, et ne devrait probablement pas exister, pour les mêmes raisons qui font que Wayland n&rsquo;expose pas de primitives de keylogging au départ. Pour l&rsquo;instant : X11.</p><h2 id=sécurité--les-secrets-que-vous-tapez-doivent-le-rester>Sécurité : les secrets que vous tapez doivent le rester</h2><p>Un démon qui lit chaque touche que vous tapez est, par construction, un keylogger avec quelques étapes en plus. Trois règles gouvernent la conception :</p><ol><li><strong>Rien n&rsquo;est jamais persisté.</strong> Les frappes, les mots et les phrases vivent en mémoire dans un petit tampon circulaire, et seules les dernières corrections sont conservées (pour l&rsquo;annulation <code>Ctrl+Z</code>). Rien n&rsquo;est écrit sur le disque. Rien n&rsquo;est envoyé sur le réseau. Il n&rsquo;y a aucune télémétrie, aucun analytics, aucune « statistique d&rsquo;usage anonyme ».</li><li><strong>Exclusions par défaut.</strong> La configuration par défaut exclut les gestionnaires de mots de passe (<code>keepassxc</code>, <code>1password</code>, <code>bitwarden</code>) par classe d&rsquo;application, ainsi que toute fenêtre dont le titre correspond à <code>password</code>, <code>mot de passe</code> ou <code>sudo</code>. Quand la fenêtre au focus correspond à une exclusion, frfix ne met même pas les frappes en tampon ; elles passent sans être touchées.</li><li><strong>Exclusions extensibles par l&rsquo;utilisateur.</strong> Si vous tapez des secrets dans une application inhabituelle, ajoutez-la à <code>exclusions.apps</code> ou <code>exclusions.window_titles</code> dans la configuration. La vérification d&rsquo;exclusion a lieu <em>avant</em> que quoi que ce soit ne soit mis en tampon ou comparé au dictionnaire.</li></ol><p>Ce modèle de confiance est le prix de cette conception. Si vous ne pouvez pas accepter un démon avec un accès en lecture à <code>/dev/input</code>, ne l&rsquo;exécutez pas. C&rsquo;est le même modèle de confiance que tout outil d&rsquo;enregistrement d&rsquo;écran, tout enregistreur de macros et tout utilitaire d&rsquo;accessibilité sous Linux, mais cela mérite d&rsquo;être dit clairement.</p><h2 id=installation-et-lancement>Installation et lancement</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>git clone https://github.com/lemmebee/frfix.git
+</span></span><span style=display:flex><span>cd frfix
+</span></span><span style=display:flex><span>bash setup.sh
+</span></span></code></pre></div><p><code>setup.sh</code> installe les paquets système (<code>hunspell</code>, <code>gobject-introspection</code>, l&rsquo;outillage venv de Python, <code>xdotool</code>), ajoute votre utilisateur au groupe <code>input</code>, crée un environnement virtuel et installe une unité systemd utilisateur. Si vous venez d&rsquo;être ajouté à <code>input</code>, déconnectez-vous puis reconnectez-vous avant de lancer.</p><p>Ensuite :</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># foreground, interactive</span>
+</span></span><span style=display:flex><span>.venv/bin/frfix
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># verbose: see keystrokes, candidate words, correction decisions</span>
+</span></span><span style=display:flex><span>.venv/bin/frfix --debug
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># as a systemd user service, auto-start on login</span>
+</span></span><span style=display:flex><span>systemctl --user enable --now frfix
+</span></span><span style=display:flex><span>journalctl --user -u frfix -f
+</span></span></code></pre></div><p>Le flag <code>--debug</code> est la chose la plus utile quand quelque chose ne fonctionne pas. Il affiche chaque frappe reçue, chaque frontière de mot détectée et chaque décision de correction. Si des mots apparaissent mais que les corrections ne se déclenchent jamais, c&rsquo;est que hunspell n&rsquo;est pas installé ou que la vérification de layout rejette votre layout courant. Si aucune frappe n&rsquo;apparaît du tout, c&rsquo;est que vous n&rsquo;êtes pas dans le groupe <code>input</code> (ou que vous ne vous êtes pas déconnecté puis reconnecté depuis l&rsquo;ajout).</p><h2 id=configuration>Configuration</h2><p>La configuration se trouve à <code>~/.config/frfix/frfix.toml</code>, créée automatiquement au premier lancement :</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[<span style=color:#a6e22e>general</span>]
+</span></span><span style=display:flex><span><span style=color:#a6e22e>enabled</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[<span style=color:#a6e22e>corrections</span>]
+</span></span><span style=display:flex><span><span style=color:#a6e22e>spelling</span> = <span style=color:#66d9ef>true</span>     <span style=color:#75715e># word-level: accents, typos, elisions</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>grammar</span>  = <span style=color:#66d9ef>true</span>     <span style=color:#75715e># sentence-level grammalecte rules</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[<span style=color:#a6e22e>overlay</span>]
+</span></span><span style=display:flex><span><span style=color:#a6e22e>enabled</span>       = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>duration_ms</span>   = <span style=color:#ae81ff>1500</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>bg_color</span>      = <span style=color:#e6db74>&#34;#1a1a2e&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>text_color</span>    = <span style=color:#e6db74>&#34;#e0e0e0&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>highlight_color</span> = <span style=color:#e6db74>&#34;#4ecca3&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[<span style=color:#a6e22e>exclusions</span>]
+</span></span><span style=display:flex><span><span style=color:#a6e22e>apps</span>          = [<span style=color:#e6db74>&#34;keepassxc&#34;</span>, <span style=color:#e6db74>&#34;1password&#34;</span>, <span style=color:#e6db74>&#34;bitwarden&#34;</span>]
+</span></span><span style=display:flex><span><span style=color:#a6e22e>window_titles</span> = [<span style=color:#e6db74>&#34;password&#34;</span>, <span style=color:#e6db74>&#34;mot de passe&#34;</span>, <span style=color:#e6db74>&#34;sudo&#34;</span>]
+</span></span></code></pre></div><p>Un petit overlay GTK (toast) affiche brièvement la paire original → corrigé pour que vous <em>appreniez</em> vraiment ce que vous avez mal tapé, au lieu que frfix lisse silencieusement la même faute pour la 500e fois. Désactivez-le en fixant <code>[overlay].enabled = false</code>.</p><p>Le dictionnaire utilisateur (<code>~/.config/frfix/dictionary.txt</code>) est à raison d&rsquo;un mot par ligne. Tout ce qui s&rsquo;y trouve est traité comme un mot français valide. Utilisez-le pour les noms propres, les noms de marques, le jargon, la terminologie interne à l&rsquo;entreprise.</p><h2 id=limites-et-compromis-assumés>Limites et compromis assumés</h2><ul><li><strong>X11 uniquement.</strong> Déjà abordé. Wayland n&rsquo;est structurellement pas pris en charge.</li><li><strong>Français uniquement.</strong> Toute la couche de correction est bâtie autour de hunspell-fr et de grammalecte. La prise en charge multilingue impliquerait de détecter la langue de chaque mot, un problème difficile et explicitement hors périmètre.</li><li><strong>L&rsquo;injection via xdotool est sensible au timing.</strong> Certaines applications (surtout Electron et certains multiplexeurs de terminal) avalent ou réordonnent occasionnellement les événements injectés. Quand ça tourne mal, vous obtenez un mot à moitié corrigé ; <code>Ctrl+Z</code> l&rsquo;annule.</li><li><strong>Aucune compréhension sémantique.</strong> Les règles de grammalecte sont bonnes mais pas parfaites. Les phrases avec des constructions rares peuvent déclencher des faux positifs. Ajoutez des corrections à votre dictionnaire utilisateur ; si une règle de grammaire particulière se déclenche à tort de façon répétée, désactivez <code>[corrections].grammar</code>.</li><li><strong>Qualité alpha.</strong> Le correcteur est conservateur à dessein. Il reste des classes de fautes qu&rsquo;il n&rsquo;attrape pas encore, en particulier les élisions complexes (<code>s'il</code> vs <code>si il</code>) et les mots composés.</li></ul><p>Le but n&rsquo;est pas d&rsquo;être parfait. Le but est de corriger les 95 % de fautes triviales que <em>tout</em> francophone qui tape fait <em>chaque</em> jour, pour que le budget cognitif aille au contenu réel.</p><h2 id=la-suite>La suite</h2><p>Les éléments que j&rsquo;ai le plus envie d&rsquo;étendre :</p><ul><li><strong>Meilleur scoring des candidats.</strong> Actuellement, la première suggestion plausible de hunspell l&rsquo;emporte. Un scorer pondéré par la fréquence sur un corpus français ferait mieux.</li><li><strong>Comportement par application.</strong> Désactiver la grammaire dans les terminaux (où vous tapez des commandes, pas de la prose), activer un mode strict dans les éditeurs.</li><li><strong>Statistiques.</strong> Locales uniquement. Quelles classes de fautes l&rsquo;utilisateur fait-il le plus ? Strictement sur opt-in, ne quitte jamais la machine.</li></ul><p>Si vous écrivez en français tous les jours sous Linux et que l&rsquo;incohérence de la correction orthographique d&rsquo;une application à l&rsquo;autre vous agace autant qu&rsquo;elle m&rsquo;agace, essayez-le. Les PR sont les bienvenues.</p><p>Source : <a href=https://github.com/lemmebee/frfix>github.com/lemmebee/frfix</a>. MIT.</p></article><footer class=site-footer><p class=glitch-text>[ Ehab ELFEKI ]</p></footer><style>.site-footer{text-align:center;opacity:.7;font-size:.9rem;margin-top:4rem;padding-bottom:1.5rem}.site-footer p{margin:0}.glitch-text .glitch-char{display:inline-block;position:relative}.glitch-text .glitch-char.space{width:.3em}.glitch-text .glitch-char.glitching{animation:glitchChar .15s steps(2)forwards;color:#0f0;text-shadow:-1px 0 red,1px 0 #0ff}@keyframes glitchChar{0%{transform:translate(2px,-1px)skewX(10deg);opacity:.8}25%{transform:translate(-2px,1px)skewX(-5deg);opacity:.6}50%{transform:translate(1px,2px)skewX(3deg);opacity:.9}75%{transform:translate(-1px,-2px)skewX(-8deg);opacity:.7}100%{transform:translate(0,0)skewX(0);opacity:1;color:inherit;text-shadow:none}}</style><script>(function(){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;const t=document.querySelectorAll(".glitch-text"),e="!@#$%^&*()_+-=[]{}|;':\",./<>?`~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";t.forEach(function(t){const o=t.textContent;t.innerHTML="";const i=[];for(var n,s=0;s<o.length;s++)n=document.createElement("span"),n.className="glitch-char",o[s]===" "?(n.innerHTML="&nbsp;",n.classList.add("space")):n.textContent=o[s],n.dataset.original=o[s],t.appendChild(n),i.push(n);function a(){for(var t,s,o,a=Math.floor(Math.random()*3)+1,n=0;n<a;n++){if(s=Math.floor(Math.random()*i.length),t=i[s],t.dataset.original===" ")continue;t.classList.add("glitching"),o=3+Math.floor(Math.random()*4),function(t,n){var s=0,o=setInterval(function(){t.textContent=e[Math.floor(Math.random()*e.length)],s++,s>=n&&(clearInterval(o),t.textContent=t.dataset.original,t.classList.remove("glitching"))},50)}(t,o)}}function r(){var e=1e3+Math.random()*1500;setTimeout(function(){a(),r()},e)}a(),r()})})()</script></div></div></main><canvas id=bg-canvas style=position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block></canvas>
+<script type=importmap>
+{ "imports": { "three": "https://esm.sh/three@0.162.0" } }
+</script><script type=module>
+import * as THREE from 'three';
+
+const bgColor = getComputedStyle(document.body).backgroundColor || '#000';
+const SHAPES = ['box', 'tetra', 'octa', 'torus', 'ring'];
+
+let scene, camera, renderer;
+let objects = [];
+let particles;
+let mouseX = 0, mouseY = 0;
+let width = window.innerWidth;
+let height = window.innerHeight;
+
+const canvas = document.getElementById('bg-canvas');
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function randColor() {
+    const hue = Math.random() * 360;
+    return `hsl(${hue}, 70%, 60%)`;
+}
+
+function randGeometry() {
+    switch (SHAPES[Math.floor(Math.random() * SHAPES.length)]) {
+        case 'box': return new THREE.BoxGeometry(1, 1, 1);
+        case 'tetra': return new THREE.TetrahedronGeometry(0.8);
+        case 'octa': return new THREE.OctahedronGeometry(0.7);
+        case 'torus': return new THREE.TorusGeometry(0.6, 0.2, 8, 12);
+        case 'ring': return new THREE.TorusKnotGeometry(0.5, 0.15, 48, 8);
+    }
+}
+
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(bgColor);
+    scene.fog = new THREE.FogExp2(bgColor, 0.02);
+
+    camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 150);
+    camera.position.z = 35;
+
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    createObjects();
+    createParticles();
+
+    window.addEventListener('resize', onResize);
+    document.addEventListener('mousemove', onMouse);
+    requestAnimationFrame(animate);
+}
+
+function createObjects() {
+    const count = 20 + Math.floor(Math.random() * 15);
+    for (let i = 0; i < count; i++) {
+        const group = new THREE.Group();
+        const geo = randGeometry();
+        const color = randColor();
+        const edgesGeo = new THREE.EdgesGeometry(geo);
+
+        const faceMat = new THREE.MeshBasicMaterial({
+            color, transparent: true, opacity: 0.06 + Math.random() * 0.04, depthWrite: false
+        });
+        group.add(new THREE.Mesh(geo, faceMat));
+
+        const edgeMat = new THREE.LineBasicMaterial({
+            color, transparent: true, opacity: 0.2 + Math.random() * 0.2, depthWrite: false
+        });
+        group.add(new THREE.LineSegments(edgesGeo, edgeMat));
+
+        const x = (Math.random() - 0.5) * 60;
+        const y = (Math.random() - 0.5) * 40;
+        const z = (Math.random() - 0.5) * 30;
+        group.position.set(x, y, z);
+        group.scale.setScalar(0.3 + Math.random() * 1.5);
+
+        group.userData = {
+            origin: new THREE.Vector3(x, y, z),
+            phase: Math.random() * Math.PI * 2,
+            rotSpeed: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.004,
+                (Math.random() - 0.5) * 0.004,
+                (Math.random() - 0.5) * 0.002
+            ),
+            bobSpeed: 0.2 + Math.random() * 0.5,
+            bobAmp: 0.3 + Math.random() * 2,
+            driftAmp: 0.2 + Math.random() * 0.6,
+        };
+
+        scene.add(group);
+        objects.push(group);
+    }
+}
+
+function createParticles() {
+    const count = 100;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+        pos[i * 3] = (Math.random() - 0.5) * 70;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * 50;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+        const c = new THREE.Color(randColor());
+        colors[i * 3] = c.r;
+        colors[i * 3 + 1] = c.g;
+        colors[i * 3 + 2] = c.b;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const c = document.createElement('canvas');
+    c.width = c.height = 4;
+    c.getContext('2d').fillStyle = '#fff';
+    c.getContext('2d').fillRect(0, 0, 4, 4);
+    const tex = new THREE.CanvasTexture(c);
+    tex.magFilter = THREE.NearestFilter;
+
+    particles = new THREE.Points(geo, new THREE.PointsMaterial({
+        size: 0.2, map: tex, transparent: true, opacity: 0.4,
+        depthWrite: false, sizeAttenuation: true, vertexColors: true,
+    }));
+    scene.add(particles);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const speed = reduced ? 0.1 : 1.0;
+    const t = performance.now() * 0.001 * speed;
+
+    for (const obj of objects) {
+        const d = obj.userData;
+        obj.position.y = d.origin.y + Math.sin(t * d.bobSpeed + d.phase) * d.bobAmp;
+        obj.position.x = d.origin.x + Math.cos(t * 0.25 + d.phase) * d.driftAmp;
+        obj.rotation.x += d.rotSpeed.x * speed;
+        obj.rotation.y += d.rotSpeed.y * speed;
+        obj.rotation.z += d.rotSpeed.z * speed;
+        const edge = obj.children[1];
+        if (edge?.material) {
+            edge.material.opacity = 0.2 + Math.sin(t * 1.2 + d.phase) * 0.1;
+        }
+    }
+
+    if (particles) {
+        const pos = particles.geometry.attributes.position.array;
+        for (let i = 0; i < pos.length; i += 3) {
+            pos[i + 1] += 0.006 * speed;
+            if (pos[i + 1] > 25) pos[i + 1] = -25;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    if (!reduced) {
+        camera.position.x += (mouseX * 1.0 - camera.position.x) * 0.02;
+        camera.position.y += (-mouseY * 0.6 - camera.position.y) * 0.02;
+        camera.lookAt(scene.position);
+    }
+
+    renderer.render(scene, camera);
+}
+
+function onResize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
+
+function onMouse(e) {
+    mouseX = (e.clientX / width) * 2 - 1;
+    mouseY = (e.clientY / height) * 2 - 1;
+}
+
+init();
+</script></body></html>

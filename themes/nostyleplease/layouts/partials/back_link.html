@@ -1,1 +1,1 @@
-<a href="{{ "" | relURL }}">{{ $.Site.Params.theme_config.back_home_text }}</a>
+<a href="{{ if eq site.Language.Lang "fr" }}/fr/{{ else }}/{{ end }}">{{ if eq site.Language.Lang "fr" }}← accueil{{ else }}{{ $.Site.Params.theme_config.back_home_text }}{{ end }}</a>

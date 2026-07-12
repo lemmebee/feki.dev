@@ -2,6 +2,7 @@
 <html lang="{{ $.Site.LanguageCode }}">
     {{- partial "head.html" . -}}
     <body a="{{ $.Site.Params.theme_config.appearance | default "auto" }}">
+        {{ partial "lang_switch.html" . }}
         <main class="page-content" aria-label="Content">
             <div class="content-panel">
                 <div class="w">
@@ -14,6 +15,7 @@
                         </p>
                     </div>
                     {{- block "main" . }}{{- end }}
+                    {{ partial "footer.html" }}
                 </div>
             </div>
         </main>

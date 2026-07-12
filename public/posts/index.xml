@@ -1,33 +1,83 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on feki.dev</title>
-    <link>http://localhost:1313/feki.dev/posts/</link>
-    <description>Recent content in Posts on feki.dev</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Thu, 28 Aug 2025 21:14:07 +0200</lastBuildDate>
-    <atom:link href="http://localhost:1313/feki.dev/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Migrating Postgresql Rds From Multiple Aws Accounts to a Single Rds Instance</title>
-      <link>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</link>
-      <pubDate>Thu, 28 Aug 2025 21:14:07 +0200</pubDate>
-      <guid>http://localhost:1313/feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</guid>
-      <description>Table of Contents The Scenario Our Architecture Prerequisites The Migration Strategy: Why pg_dump and pg_restore? Step-by-Step Migration Guide Phase 1: Preparing the Target (Non-Prod) Account Phase 2: Preparing the Source Accounts (A &amp;amp; B) Phase 3: Executing the Migration Script Phase 4: Post-Migration Validation Final Considerations As organizations grow, it&amp;rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs.</description>
-    </item>
-    <item>
-      <title>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</title>
-      <link>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link>
-      <pubDate>Fri, 25 Apr 2025 20:30:56 +0200</pubDate>
-      <guid>http://localhost:1313/feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</guid>
-      <description>Table of Contents The Problem The Key Challenge Failed Approaches The Solution: Child Pipelines How the Solution Works Key Advantages Gotchas and Lessons Learned Conclusion In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&amp;rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.</description>
-    </item>
-    <item>
-      <title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title>
-      <link>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link>
-      <pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate>
-      <guid>http://localhost:1313/feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid>
-      <description>tl;dr: Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&#xA;Table of contents The Challenge: When Templates Become Obstacles The Transformation: Introducing a Modular, Language-Agnostic Architecture 1. Modular Design with include 2.</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on feki.dev</title><link>https://feki.dev/posts/</link><description>Recent content in Posts on feki.dev</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Sun, 12 Jul 2026 10:00:00 +0200</lastBuildDate><atom:link href="https://feki.dev/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Contract Testing a Microservice Fleet Without Slowing Delivery</title><link>https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/</link><pubDate>Sun, 12 Jul 2026 10:00:00 +0200</pubDate><guid>https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/</guid><description>&lt;p>&lt;strong>tl;dr:&lt;/strong> End-to-end tests across a microservice fleet are slow, flaky, and force teams to deploy in lockstep. Consumer-driven contract testing replaces the shared staging bottleneck with fast, isolated checks that each service runs on its own. This post lays out an architecture built around a Pact Broker and a &lt;code>can-i-deploy&lt;/code> gate, and shows how to wire it into CI so it protects integrations without blocking a single pipeline.&lt;/p>
+&lt;hr>
+&lt;h2 id="table-of-contents">Table of contents&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#the-problem-integration-confidence-doesnt-scale">The Problem: Integration Confidence Doesn&amp;rsquo;t Scale&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#why-not-more-end-to-end-tests">Why Not More End-to-End Tests&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#consumer-driven-contracts-in-one-minute">Consumer-Driven Contracts in One Minute&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#the-architecture">The Architecture&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#the-consumer-side">The Consumer Side&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#the-provider-side">The Provider Side&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#the-deploy-gate-can-i-deploy">The Deploy Gate: can-i-deploy&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#why-this-stays-fast">Why This Stays Fast&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#versioning-and-environments">Versioning and Environments&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#rollout-without-a-big-bang">Rollout Without a Big Bang&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#pitfalls">Pitfalls&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/contract-testing-a-microservice-fleet-without-slowing-delivery/#wrap">Wrap&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="the-problem-integration-confidence-doesnt-scale">The Problem: Integration Confidence Doesn&amp;rsquo;t Scale&lt;/h2>
+&lt;p>A single service is easy to test. A fleet of forty services that call each other over HTTP is not. The question every team keeps asking is simple: &lt;em>if I change this endpoint, whose deploy do I break?&lt;/em>&lt;/p></description></item><item><title>frfix: A System-Wide French Autocorrect Daemon for Linux</title><link>https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/</link><pubDate>Tue, 19 May 2026 09:00:00 +0200</pubDate><guid>https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/</guid><description>&lt;p>&lt;strong>tl;dr:&lt;/strong> Web browsers, chat apps, and IDEs all ship their own spellcheckers, except your terminal, your password-protected note app, and half the niche tools you actually use every day. &lt;code>frfix&lt;/code> is a small Python daemon that reads keystrokes via &lt;code>evdev&lt;/code>, runs them through &lt;code>hunspell&lt;/code> and &lt;code>grammalecte&lt;/code>, and silently rewrites French mistakes anywhere on Linux/X11. No extension, no clipboard trick, no input method engine. Source: &lt;a href="https://github.com/lemmebee/frfix">github.com/lemmebee/frfix&lt;/a>.&lt;/p>
+&lt;hr>
+&lt;h2 id="table-of-contents">Table of contents&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#the-problem-spellcheck-stops-at-the-app-boundary">The Problem: Spellcheck Stops at the App Boundary&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#the-idea-spellcheck-that-acts-instead-of-underlining">The Idea: Spellcheck That Acts Instead of Underlining&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#what-it-corrects">What It Corrects&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#how-it-works">How It Works&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#1-reading-keystrokes-with-evdev">1. Reading Keystrokes with &lt;code>evdev&lt;/code>&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#2-translating-keycodes-via-x11xkb">2. Translating Keycodes via X11/xkb&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#3-building-words-and-sentences">3. Building Words and Sentences&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#4-correcting-with-hunspell--grammalecte">4. Correcting with hunspell + grammalecte&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#5-injecting-the-fix-with-xdotool">5. Injecting the Fix with &lt;code>xdotool&lt;/code>&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#why-x11-only-and-why-not-wayland">Why X11 Only (and Why Not Wayland)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#security-typing-secrets-must-stay-secret">Security: Typing Secrets Must Stay Secret&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#install-and-run">Install and Run&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#configuration">Configuration&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#limitations-and-honest-trade-offs">Limitations and Honest Trade-offs&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/frfix-a-system-wide-french-autocorrect-daemon-for-linux/#whats-next">What&amp;rsquo;s Next&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="the-problem-spellcheck-stops-at-the-app-boundary">The Problem: Spellcheck Stops at the App Boundary&lt;/h2>
+&lt;p>Writing French on Linux is a paper-cut experience. Firefox autocorrects, GNOME Text Editor underlines, Slack catches half of it. Then you switch to a terminal, a Tauri app, an Electron tool that disabled spellcheck, an SSH session, a custom React form with &lt;code>spellcheck=&amp;quot;false&amp;quot;&lt;/code>, or a GTK widget nobody bothered to wire up, and you&amp;rsquo;re back to typing &lt;code>francais&lt;/code> and &lt;code>cest&lt;/code> and pretending nobody noticed.&lt;/p></description></item><item><title>Migrating PostgreSQL RDS from Multiple AWS Accounts to a Single Instance</title><link>https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</link><pubDate>Thu, 28 Aug 2025 21:14:07 +0200</pubDate><guid>https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/</guid><description>&lt;h1 id="table-of-contents">Table of Contents&lt;/h1>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#the-scenario">The Scenario&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#our-architecture">Our Architecture&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#prerequisites">Prerequisites&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#the-migration-strategy-why-pg_dump-and-pg_restore">The Migration Strategy: Why &lt;code>pg_dump&lt;/code> and &lt;code>pg_restore&lt;/code>?&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#step-by-step-migration-guide">Step-by-Step Migration Guide&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#phase-1-preparing-the-target-non-prod-account">Phase 1: Preparing the Target (Non-Prod) Account&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#phase-2-preparing-the-source-accounts-a--b">Phase 2: Preparing the Source Accounts (A &amp;amp; B)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#phase-3-executing-the-migration-script">Phase 3: Executing the Migration Script&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#phase-4-post-migration-validation">Phase 4: Post-Migration Validation&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/migrating-postgresql-rds-from-multiple-aws-accounts-to-a-single-rds-instance/#final-considerations">Final Considerations&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>As organizations grow, it&amp;rsquo;s common for development and testing environments to become siloed in separate AWS accounts. While this is great for security and billing isolation, it can lead to increased management overhead and costs. A common strategy to streamline operations is to consolidate these non-production databases into a single, shared RDS instance in a central &amp;ldquo;Non-Prod&amp;rdquo; account.&lt;/p></description></item><item><title>Mastering GitLab CI/CD: Dynamic Environment Selection with Child Pipelines</title><link>https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</link><pubDate>Fri, 25 Apr 2025 20:30:56 +0200</pubDate><guid>https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/</guid><description>&lt;h2 id="table-of-contents">Table of Contents&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#the-problem">The Problem&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#the-key-challenge">The Key Challenge&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#failed-approaches">Failed Approaches&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#the-solution-child-pipelines">The Solution: Child Pipelines&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#how-the-solution-works">How the Solution Works&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#key-advantages">Key Advantages&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#gotchas-and-lessons-learned">Gotchas and Lessons Learned&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/mastering-gitlab-ci-cd-dynamic-environment-selection-with-child-pipelines/#conclusion">Conclusion&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>In modern software development, CI/CD pipelines are crucial for automating testing and deployment processes. However, when your testing strategy involves multiple environments and complex scheduling, pipeline configuration can become challenging. In this article, I&amp;rsquo;ll share how I solved a particularly tricky GitLab CI/CD problem involving environment-specific variables and dynamic environment selection.&lt;/p></description></item><item><title>From Rigid to Robust: Revamping Our CI Templates for a Modern Workflow</title><link>https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</link><pubDate>Thu, 03 Apr 2025 22:30:56 +0200</pubDate><guid>https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/</guid><description>&lt;p>&lt;strong>tl;dr:&lt;/strong> Our old CI/CD templates were repetitive, inflexible, and hard to maintain. We rebuilt them using a modular, language-agnostic approach with reusable components, smart conditional logic, and automated tooling (like versioning and security scanning). This resulted in faster, more consistent, secure, and maintainable pipelines adaptable to various project needs.&lt;/p>
+&lt;hr>
+&lt;h2 id="table-of-contents">Table of contents&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#the-challenge-when-templates-become-obstacles">The Challenge: When Templates Become Obstacles&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#the-transformation-introducing-a-modular-language-agnostic-architecture">The Transformation: Introducing a Modular, Language-Agnostic Architecture&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#1-modular-design-with-include">1. Modular Design with &lt;code>include&lt;/code>&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#2-language-agnostic-approach--smart-detection">2. Language-Agnostic Approach &amp;amp; Smart Detection&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#3-unified-pipeline-stages">3. Unified Pipeline Stages&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#4-advanced-cicd-capabilities">4. Advanced CI/CD Capabilities&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#the-benefits-a-more-efficient-and-secure-future">The Benefits: A More Efficient and Secure Future&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://feki.dev/posts/from-rigid-to-robust-revamping-our-ci-templates-for-a-modern-workflow/#conclusion">Conclusion&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Continuous Integration and Continuous Deployment (CI/CD) pipelines are the backbone of modern software development. However, the templates governing these pipelines can often become a source of frustration – rigid, repetitive, difficult to maintain, and struggling to keep up with diverse tech stacks. We faced these exact issues with our internal CI template repository. This is the story of how we transformed our CI architecture from a maintenance headache into a flexible, modular, and powerful asset.&lt;/p></description></item></channel></rss>
