@@ -1,0 +1,26 @@
+[about_home]
+other = "← home"
+
+[about_title]
+other = "about-me"
+
+[skills_automation]
+other = "Automation"
+
+[skills_cloud]
+other = "Cloud"
+
+[skills_security]
+other = "Security"
+
+[skills_monitoring]
+other = "Monitoring"
+
+[skills_programming]
+other = "Programming"
+
+[skills_quality]
+other = "Quality"
+
+[posts_see_all]
+other = "see all →"

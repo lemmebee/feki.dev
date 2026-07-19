@@ -120,6 +120,24 @@
     color: #61afef;
   }
 
+  .about-text p {
+    margin: 0 0 1.1em;
+  }
+
+  .about-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .skills-column {
+    min-width: 180px;
+  }
+
   .product-item {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -175,6 +193,11 @@
       grid-template-columns: 1fr;
       gap: 2px;
     }
+
+    .skills-grid {
+      flex-direction: column;
+      gap: 10px;
+    }
   }
   
   .category {
@@ -227,9 +250,9 @@
 <div class="terminal">
   <div class="terminal-header">
     <div class="terminal-controls">
-      <a href="{{ if eq site.Language.Lang "fr" }}/fr/{{ else }}/{{ end }}" class="terminal-home-link">{{ if eq site.Language.Lang "fr" }}← accueil{{ else }}← home{{ end }}</a>
+      <a href="{{ site.Home.RelPermalink }}" class="terminal-home-link">{{ i18n "about_home" }}</a>
     </div>
-    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ {{ if eq site.Language.Lang "fr" }}a-propos{{ else }}about-me{{ end }}</div>
+    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ {{ i18n "about_title" }}</div>
   </div>
   <div class="terminal-body">
     <div class="command-block">
@@ -237,47 +260,24 @@
         <span class="command">ehab@elfeki:~$ whoami</span>
       </div>
       <div class="about-text">
-        {{ if eq site.Language.Lang "fr" }}
-        Je construis à grande échelle : les services, les pipelines, le cloud et les tests qui les protègent.<br><br>
-        Huit ans entre le développement backend, l'infrastructure cloud et l'automatisation des tests. La plupart des ingénieurs couvrent l'un des trois. Maîtriser toute la chaîne, c'est supprimer les passages de relais qui ralentissent la livraison, et c'est ce qui m'amène sur les problèmes situés entre les équipes.<br><br>
-        <strong>Logiciel.</strong> Chez Contentsquare, j'ai construit une plateforme d'analyse pour l'ingénierie : un pipeline de données agrégeant AWS, Prometheus, Jira, GitHub et TestRail, la couverture par merge livrée via une CLI CI, et plus de 30 vues de base de données derrière un tableau de bord réellement utilisé par les équipes. En dehors du travail, je livre en Go et en Python : une passerelle asynchrone d'émission de certificats avec pool de workers, idempotence atomique et injection de fautes intégrée ; un démon de correction automatique du français en temps réel pour Linux ; une application full-stack de répétition espacée sur FastAPI.<br><br>
-        <strong>Infrastructure.</strong> Chez ORIS, j'ai réduit les coûts AWS de 30 à 50 % via consolidation multi-comptes, reconfiguration EKS/Karpenter, remplacement de la NAT Gateway (~90 % de trafic sortant en moins) et extinction hors heures ouvrées, et j'ai migré une flotte de microservices vers un workflow GitOps Helm/ArgoCD avec détection automatique de dérive. Chez Contentsquare, des déploiements Kubernetes basés sur Terraform pour plus de 15 microservices, avec un objectif de disponibilité de 99,95 %, absorbant des pics de trafic jusqu'à 300 %.<br><br>
-        <strong>Livraison.</strong> J'ai refondu la CI/CD en templates GitLab réutilisables avec détection automatique des projets sur Node.js, Python, Java et Go, et déplacé les runners d'EC2 vers un groupe EKS spot auto-scalable pour exécuter les suites en parallèle sous charge.<br><br>
-        <strong>Tests.</strong> Je viens de l'automatisation des tests et cela façonne encore ma façon de construire : des quality gates (SonarQube, Trivy) intégrés au pipeline plutôt que rajoutés après coup, des tests de contrat qui permettent à une flotte de microservices de se déployer indépendamment, des suites bout-en-bout parallélisées pour réduire le temps d'exécution d'environ 60 %.<br><br>
-        L'essentiel de ce que j'apprends en chemin finit dans les articles de ce site.
-        {{ else }}
-        I build for scale: the services, the pipelines, the cloud, and the tests that guard them.<br><br>
-        Eight years across backend engineering, cloud infrastructure, and test automation. Most engineers own one of those. Owning the chain is what removes the handoffs that slow delivery down, and it is why I end up on the problems that sit between teams.<br><br>
-        <strong>Software.</strong> At Contentsquare I built an engineering insights platform: a data pipeline ingesting AWS, Prometheus, Jira, GitHub, and TestRail, per-merge coverage shipped through a CI CLI, and 30+ database views behind a dashboard teams actually used. Outside work I ship in Go and Python: an async certificate issuance gateway with a worker pool, atomic idempotency, and built-in fault injection; a real-time French autocorrect daemon for Linux; a full-stack spaced-repetition app on FastAPI.<br><br>
-        <strong>Infrastructure.</strong> At ORIS I cut AWS costs 30-50% through multi-account consolidation, EKS/Karpenter reconfiguration, NAT Gateway replacement (~90% egress reduction), and off-hours shutdown, and moved a microservice fleet to Helm/ArgoCD GitOps with automated drift detection. At Contentsquare, Terraform-based Kubernetes deployments for 15+ microservices to a 99.95% availability target, absorbing traffic spikes up to 300%.<br><br>
-        <strong>Delivery.</strong> I re-architected CI/CD into reusable GitLab templates with automatic project detection across Node.js, Python, Java, and Go, and moved runners from EC2 to an autoscaling EKS spot nodegroup so suites run in parallel under load.<br><br>
-        <strong>Testing.</strong> I came up through test automation and it still shapes how I build: quality gates (SonarQube, Trivy) wired into the pipeline rather than bolted on, contract tests that let a microservice fleet deploy independently, end-to-end suites parallelized to cut execution time ~60%.<br><br>
-        Most of what I learn doing this ends up in the posts on this site.
-        {{ end }}
+        {{ .Content }}
       </div>
     </div>
-    
+
     <div class="command-block">
       <div class="prompt">
         <span class="command">ehab@elfeki:~$ ls -1 ~/products</span>
       </div>
       <div class="about-text">
+        {{- range .Params.products }}
         <div class="product-item">
-          <span class="product-name"><a href="https://github.com/lemmebee/issuance-gateway">issuance-gateway</a><span class="lang">{{ partial "lang_icon.html" "go" }}Go</span></span>
-          <span>{{ if eq site.Language.Lang "fr" }}Passerelle asynchrone d'émission de certificats en Go. Pool de workers, idempotence atomique, arrêt gracieux, livraison unique PKCS#12, injection de fautes intégrée.{{ else }}Async certificate issuance gateway in Go. Worker pool, atomic idempotency, graceful shutdown, one-time PKCS#12 delivery, built-in fault injection.{{ end }}</span>
+          <span class="product-name">
+            <a href="{{ .url }}">{{ .name }}</a>
+            <span class="lang">{{ partial "lang_icon.html" .lang }}{{ .lang_label }}</span>
+          </span>
+          <span>{{ .desc }}</span>
         </div>
-        <div class="product-item">
-          <span class="product-name"><a href="https://github.com/lemmebee/frfix">frfix</a><span class="lang">{{ partial "lang_icon.html" "python" }}Python</span></span>
-          <span>{{ if eq site.Language.Lang "fr" }}Démon de correction automatique du français en temps réel pour Linux/X11, conservateur par conception.{{ else }}System-wide real-time French autocorrect daemon for Linux/X11, conservative by design.{{ end }}</span>
-        </div>
-        <div class="product-item">
-          <span class="product-name"><a href="https://github.com/lemmebee/ouioui">ouioui</a><span class="lang">{{ partial "lang_icon.html" "python" }}Python</span></span>
-          <span>{{ if eq site.Language.Lang "fr" }}Application full-stack d'apprentissage du français. Scraping Larousse, traduction DeepL, répétition espacée SM-2. FastAPI, HTMX, SQLite.{{ else }}Full-stack French learning app. Larousse scraping, DeepL translation, SM-2 spaced repetition. FastAPI, HTMX, SQLite.{{ end }}</span>
-        </div>
-        <div class="product-item">
-          <span class="product-name"><a href="https://github.com/lemmebee/lazyfy">lazyfy</a><span class="lang">{{ partial "lang_icon.html" "go" }}Go</span></span>
-          <span>{{ if eq site.Language.Lang "fr" }}TUI en Go créant des playlists Spotify à partir des morceaux du jour.{{ else }}Go TUI building Spotify playlists from daily featured songs.{{ end }}</span>
-        </div>
+        {{- end }}
       </div>
     </div>
 
@@ -286,16 +286,15 @@
         <span class="command">ehab@elfeki:~$ ls -lt ~/posts | head -3</span>
       </div>
       <div class="about-text">
-        {{- $posts := where site.RegularPages "Section" "posts" -}}
-        {{- range first 3 $posts }}
+        {{- range first 3 (where site.RegularPages "Section" "posts") }}
         <div class="post-item">
           <span class="post-date">{{ .Date | time.Format site.Params.theme_config.date_format }}</span>
-          <a href="{{ .Permalink | relURL }}">{{ .Title }}</a>
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
         </div>
         {{- end }}
         <div class="post-item">
           <span class="post-date"></span>
-          <a href="{{ if eq site.Language.Lang "fr" }}/fr/posts{{ else }}/posts{{ end }}">{{ if eq site.Language.Lang "fr" }}voir tout →{{ else }}see all →{{ end }}</a>
+          <a href="{{ "posts" | relLangURL }}">{{ i18n "posts_see_all" }}</a>
         </div>
       </div>
     </div>
@@ -305,7 +304,7 @@
         <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
       </div>
       <div class="about-text">
-        {{ if eq site.Language.Lang "fr" }}En dehors de la tech, je décroche en retenant ma respiration et en plongeant le plus profond possible dans la mer.{{ else }}Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can.{{ end }}
+        {{ .Params.passions }}
       </div>
     </div>
 
@@ -316,7 +315,7 @@
       <div class="about-text">
         <div class="skills-grid">
           <div class="skills-column">
-            <div class="category">{{ if eq site.Language.Lang "fr" }}Automatisation{{ else }}Automation{{ end }}</div>
+            <div class="category">{{ i18n "skills_automation" }}</div>
             <div class="skill-item">GitLab-CI</div>
             <div class="skill-item">GitHub-Actions</div>
             <div class="skill-item">Jenkins</div>
@@ -325,27 +324,27 @@
             <div class="skill-item">AWS-CDK</div>
             <div class="skill-item">CloudFormation</div>
             <div class="skill-item">Terraform</div>
-            <div class="category">Cloud</div>
+            <div class="category">{{ i18n "skills_cloud" }}</div>
             <div class="skill-item">AWS</div>
             <div class="skill-item">Kubernetes</div>
             <div class="skill-item">Docker</div>
-            <div class="category">{{ if eq site.Language.Lang "fr" }}Sécurité{{ else }}Security{{ end }}</div>
+            <div class="category">{{ i18n "skills_security" }}</div>
             <div class="skill-item">Trivy</div>
             <div class="skill-item">SonarQube</div>
             <div class="skill-item">Security-Hub</div>
           </div>
           <div class="skills-column">
-            <div class="category">{{ if eq site.Language.Lang "fr" }}Supervision{{ else }}Monitoring{{ end }}</div>
+            <div class="category">{{ i18n "skills_monitoring" }}</div>
             <div class="skill-item">Datadog</div>
             <div class="skill-item">ELK</div>
             <div class="skill-item">Grafana</div>
             <div class="skill-item">Prometheus</div>
-            <div class="category">{{ if eq site.Language.Lang "fr" }}Programmation{{ else }}Programming{{ end }}</div>
+            <div class="category">{{ i18n "skills_programming" }}</div>
             <div class="skill-item">Go</div>
             <div class="skill-item">Python</div>
             <div class="skill-item">TypeScript</div>
             <div class="skill-item">Bash</div>
-            <div class="category">{{ if eq site.Language.Lang "fr" }}Qualité{{ else }}Quality{{ end }}</div>
+            <div class="category">{{ i18n "skills_quality" }}</div>
             <div class="skill-item">Selenium</div>
             <div class="skill-item">Cypress</div>
             <div class="skill-item">Pytest</div>
@@ -362,30 +361,10 @@
         <span class="command">ehab@elfeki:~$ cat ~/get-in-touch</span>
       </div>
       <div class="about-text">
-        {{ if eq site.Language.Lang "fr" }}Une question, une opportunité, ou juste envie d'échanger :{{ else }}A question, an opportunity, or just to say hello:{{ end }}<br>
-        <a href="mailto:me@feki.dev">me@feki.dev</a>
+        {{ .Params.contact_intro }}<br>
+        <a href="mailto:{{ .Params.email }}">{{ .Params.email }}</a>
       </div>
     </div>
-
-    <!-- Add this CSS to your existing style section -->
-    <style>
-    .skills-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .skills-column {
-      min-width: 180px;
-    }
-
-    @media (max-width: 768px) {
-      .skills-grid {
-        flex-direction: column;
-        gap: 10px;
-      }
-    }
-    </style>
 
     <div class="command-block">
       <div class="prompt">

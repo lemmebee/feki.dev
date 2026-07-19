@@ -1,0 +1,26 @@
+[about_home]
+other = "← accueil"
+
+[about_title]
+other = "a-propos"
+
+[skills_automation]
+other = "Automatisation"
+
+[skills_cloud]
+other = "Cloud"
+
+[skills_security]
+other = "Sécurité"
+
+[skills_monitoring]
+other = "Supervision"
+
+[skills_programming]
+other = "Programmation"
+
+[skills_quality]
+other = "Qualité"
+
+[posts_see_all]
+other = "voir tout →"
