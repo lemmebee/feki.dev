@@ -4,7 +4,7 @@ type: "page"
 url: "about/"
 layout: "about"
 date: 2025-04-16
-passions: "Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can."
+passions: "Outside the tech world, I disconnect by holding my breath and diving deep into the sea as far as I can. It is called <a href=\"https://www.aidainternational.org/Athletes/Profile-053c496c-cee5-4f1c-b5b4-96889aefa87c\">freediving</a>."
 contact_intro: "A question, an opportunity, or just to say hello:"
 email: "me@feki.dev"
 products:

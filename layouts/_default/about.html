@@ -301,15 +301,6 @@
 
     <div class="command-block">
       <div class="prompt">
-        <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
-      </div>
-      <div class="about-text">
-        {{ .Params.passions }}
-      </div>
-    </div>
-
-    <div class="command-block">
-      <div class="prompt">
         <span class="command">ehab@elfeki:~$ cd /usr/local/skills && find . -type f -name "*.tool" | sort</span>
       </div>
       <div class="about-text">
@@ -353,6 +344,15 @@
             <div class="skill-item">TestRail</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
+      </div>
+      <div class="about-text">
+        {{ .Params.passions | safeHTML }}
       </div>
     </div>
 

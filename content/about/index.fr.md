@@ -4,7 +4,7 @@ type: "page"
 url: "about/"
 layout: "about"
 date: 2025-04-16
-passions: "En dehors de la tech, je décroche en retenant ma respiration et en plongeant le plus profond possible dans la mer."
+passions: "En dehors de la tech, je décroche en retenant ma respiration et en plongeant le plus profond possible dans la mer. Ça s'appelle l'<a href=\"https://www.aidainternational.org/Athletes/Profile-053c496c-cee5-4f1c-b5b4-96889aefa87c\">apnée</a>."
 contact_intro: "Une question, une opportunité, ou juste envie d'échanger :"
 email: "me@feki.dev"
 products:
