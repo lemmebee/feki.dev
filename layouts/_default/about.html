@@ -115,6 +115,67 @@
     margin-top: 8px;
     line-height: 1.8;
   }
+
+  .about-text a {
+    color: #61afef;
+  }
+
+  .product-item {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 15px;
+    margin-bottom: 18px;
+    align-items: start;
+  }
+
+  .product-item span {
+    color: #abb2bf;
+  }
+
+  .product-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    line-height: 1.4;
+  }
+
+  .lang {
+    color: #7f848e;
+    font-size: 0.85em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .lang svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  .lang svg.go { fill: #00add8; }
+  .lang svg.python { fill: #ffd43b; }
+
+  .post-item {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 15px;
+    margin-bottom: 8px;
+    align-items: start;
+  }
+
+  .post-date {
+    color: #7f848e;
+  }
+
+  @media (max-width: 768px) {
+    .product-item,
+    .post-item {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
   
   .category {
     color: #e06c75;
@@ -177,17 +238,68 @@
       </div>
       <div class="about-text">
         {{ if eq site.Language.Lang "fr" }}
-        Ingénieur avec 8 ans d'expérience en développement logiciel, automatisation des tests et cloud. Je construis les systèmes sur lesquels les équipes livrent : déploiement GitOps, CI/CD réutilisable, Kubernetes et infrastructure AWS.<br><br>
-        Travaux récents (ORIS, Contentsquare) : réduction des coûts cloud par consolidation multi-comptes, migration d'une flotte de microservices vers un workflow GitOps Helm/ArgoCD, refonte de la CI/CD en templates GitLab réutilisables avec détection automatique de projet, et consolidation de PostgreSQL RDS entre comptes. Ancré dans l'automatisation des tests et le développement backend, je construis des plateformes avec des quality gates et un feedback rapide intégrés dès le départ.<br><br>
-        Stack principale : AWS, Kubernetes, Terraform, AWS CDK, GitLab CI / GitHub Actions, Docker, ArgoCD, Python, Go, TypeScript.
+        Je construis à grande échelle : les services, les pipelines, le cloud et les tests qui les protègent.<br><br>
+        Huit ans entre le développement backend, l'infrastructure cloud et l'automatisation des tests. La plupart des ingénieurs couvrent l'un des trois. Maîtriser toute la chaîne, c'est supprimer les passages de relais qui ralentissent la livraison, et c'est ce qui m'amène sur les problèmes situés entre les équipes.<br><br>
+        <strong>Logiciel.</strong> Chez Contentsquare, j'ai construit une plateforme d'analyse pour l'ingénierie : un pipeline de données agrégeant AWS, Prometheus, Jira, GitHub et TestRail, la couverture par merge livrée via une CLI CI, et plus de 30 vues de base de données derrière un tableau de bord réellement utilisé par les équipes. En dehors du travail, je livre en Go et en Python : une passerelle asynchrone d'émission de certificats avec pool de workers, idempotence atomique et injection de fautes intégrée ; un démon de correction automatique du français en temps réel pour Linux ; une application full-stack de répétition espacée sur FastAPI.<br><br>
+        <strong>Infrastructure.</strong> Chez ORIS, j'ai réduit les coûts AWS de 30 à 50 % via consolidation multi-comptes, reconfiguration EKS/Karpenter, remplacement de la NAT Gateway (~90 % de trafic sortant en moins) et extinction hors heures ouvrées, et j'ai migré une flotte de microservices vers un workflow GitOps Helm/ArgoCD avec détection automatique de dérive. Chez Contentsquare, des déploiements Kubernetes basés sur Terraform pour plus de 15 microservices, avec un objectif de disponibilité de 99,95 %, absorbant des pics de trafic jusqu'à 300 %.<br><br>
+        <strong>Livraison.</strong> J'ai refondu la CI/CD en templates GitLab réutilisables avec détection automatique des projets sur Node.js, Python, Java et Go, et déplacé les runners d'EC2 vers un groupe EKS spot auto-scalable pour exécuter les suites en parallèle sous charge.<br><br>
+        <strong>Tests.</strong> Je viens de l'automatisation des tests et cela façonne encore ma façon de construire : des quality gates (SonarQube, Trivy) intégrés au pipeline plutôt que rajoutés après coup, des tests de contrat qui permettent à une flotte de microservices de se déployer indépendamment, des suites bout-en-bout parallélisées pour réduire le temps d'exécution d'environ 60 %.<br><br>
+        L'essentiel de ce que j'apprends en chemin finit dans les articles de ce site.
         {{ else }}
-        Engineer with 8 years across software engineering, test automation, and cloud. I build the systems teams ship through: GitOps delivery, reusable CI/CD, Kubernetes, and AWS infrastructure.<br><br>
-        Recent work (ORIS, Contentsquare): cut cloud costs through multi-account consolidation, moved a microservice fleet to a Helm/ArgoCD GitOps workflow, re-architected CI/CD into reusable GitLab templates with automatic project detection, and consolidated PostgreSQL RDS across accounts. Rooted in test automation and backend engineering, I build platforms with quality gates and fast feedback designed in from the start.<br><br>
-        Core stack: AWS, Kubernetes, Terraform, AWS CDK, GitLab CI / GitHub Actions, Docker, ArgoCD, Python, Go, TypeScript.
+        I build for scale: the services, the pipelines, the cloud, and the tests that guard them.<br><br>
+        Eight years across backend engineering, cloud infrastructure, and test automation. Most engineers own one of those. Owning the chain is what removes the handoffs that slow delivery down, and it is why I end up on the problems that sit between teams.<br><br>
+        <strong>Software.</strong> At Contentsquare I built an engineering insights platform: a data pipeline ingesting AWS, Prometheus, Jira, GitHub, and TestRail, per-merge coverage shipped through a CI CLI, and 30+ database views behind a dashboard teams actually used. Outside work I ship in Go and Python: an async certificate issuance gateway with a worker pool, atomic idempotency, and built-in fault injection; a real-time French autocorrect daemon for Linux; a full-stack spaced-repetition app on FastAPI.<br><br>
+        <strong>Infrastructure.</strong> At ORIS I cut AWS costs 30-50% through multi-account consolidation, EKS/Karpenter reconfiguration, NAT Gateway replacement (~90% egress reduction), and off-hours shutdown, and moved a microservice fleet to Helm/ArgoCD GitOps with automated drift detection. At Contentsquare, Terraform-based Kubernetes deployments for 15+ microservices to a 99.95% availability target, absorbing traffic spikes up to 300%.<br><br>
+        <strong>Delivery.</strong> I re-architected CI/CD into reusable GitLab templates with automatic project detection across Node.js, Python, Java, and Go, and moved runners from EC2 to an autoscaling EKS spot nodegroup so suites run in parallel under load.<br><br>
+        <strong>Testing.</strong> I came up through test automation and it still shapes how I build: quality gates (SonarQube, Trivy) wired into the pipeline rather than bolted on, contract tests that let a microservice fleet deploy independently, end-to-end suites parallelized to cut execution time ~60%.<br><br>
+        Most of what I learn doing this ends up in the posts on this site.
         {{ end }}
       </div>
     </div>
     
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ ls -1 ~/products</span>
+      </div>
+      <div class="about-text">
+        <div class="product-item">
+          <span class="product-name"><a href="https://github.com/lemmebee/issuance-gateway">issuance-gateway</a><span class="lang">{{ partial "lang_icon.html" "go" }}Go</span></span>
+          <span>{{ if eq site.Language.Lang "fr" }}Passerelle asynchrone d'émission de certificats en Go. Pool de workers, idempotence atomique, arrêt gracieux, livraison unique PKCS#12, injection de fautes intégrée.{{ else }}Async certificate issuance gateway in Go. Worker pool, atomic idempotency, graceful shutdown, one-time PKCS#12 delivery, built-in fault injection.{{ end }}</span>
+        </div>
+        <div class="product-item">
+          <span class="product-name"><a href="https://github.com/lemmebee/frfix">frfix</a><span class="lang">{{ partial "lang_icon.html" "python" }}Python</span></span>
+          <span>{{ if eq site.Language.Lang "fr" }}Démon de correction automatique du français en temps réel pour Linux/X11, conservateur par conception.{{ else }}System-wide real-time French autocorrect daemon for Linux/X11, conservative by design.{{ end }}</span>
+        </div>
+        <div class="product-item">
+          <span class="product-name"><a href="https://github.com/lemmebee/ouioui">ouioui</a><span class="lang">{{ partial "lang_icon.html" "python" }}Python</span></span>
+          <span>{{ if eq site.Language.Lang "fr" }}Application full-stack d'apprentissage du français. Scraping Larousse, traduction DeepL, répétition espacée SM-2. FastAPI, HTMX, SQLite.{{ else }}Full-stack French learning app. Larousse scraping, DeepL translation, SM-2 spaced repetition. FastAPI, HTMX, SQLite.{{ end }}</span>
+        </div>
+        <div class="product-item">
+          <span class="product-name"><a href="https://github.com/lemmebee/lazyfy">lazyfy</a><span class="lang">{{ partial "lang_icon.html" "go" }}Go</span></span>
+          <span>{{ if eq site.Language.Lang "fr" }}TUI en Go créant des playlists Spotify à partir des morceaux du jour.{{ else }}Go TUI building Spotify playlists from daily featured songs.{{ end }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ ls -lt ~/posts | head -3</span>
+      </div>
+      <div class="about-text">
+        {{- $posts := where site.RegularPages "Section" "posts" -}}
+        {{- range first 3 $posts }}
+        <div class="post-item">
+          <span class="post-date">{{ .Date | time.Format site.Params.theme_config.date_format }}</span>
+          <a href="{{ .Permalink | relURL }}">{{ .Title }}</a>
+        </div>
+        {{- end }}
+        <div class="post-item">
+          <span class="post-date"></span>
+          <a href="{{ if eq site.Language.Lang "fr" }}/fr/posts{{ else }}/posts{{ end }}">{{ if eq site.Language.Lang "fr" }}voir tout →{{ else }}see all →{{ end }}</a>
+        </div>
+      </div>
+    </div>
+
     <div class="command-block">
       <div class="prompt">
         <span class="command">ehab@elfeki:~$ cat /etc/passions</span>
@@ -208,6 +320,7 @@
             <div class="skill-item">GitLab-CI</div>
             <div class="skill-item">GitHub-Actions</div>
             <div class="skill-item">Jenkins</div>
+            <div class="skill-item">ArgoCD</div>
             <div class="skill-item">Helm</div>
             <div class="skill-item">AWS-CDK</div>
             <div class="skill-item">CloudFormation</div>
@@ -215,6 +328,7 @@
             <div class="category">Cloud</div>
             <div class="skill-item">AWS</div>
             <div class="skill-item">Kubernetes</div>
+            <div class="skill-item">Docker</div>
             <div class="category">{{ if eq site.Language.Lang "fr" }}Sécurité{{ else }}Security{{ end }}</div>
             <div class="skill-item">Trivy</div>
             <div class="skill-item">SonarQube</div>
@@ -245,14 +359,11 @@
 
     <div class="command-block">
       <div class="prompt">
-        <span class="command">ehab@elfeki:~$ command -v docker kubectl terraform helm argocd</span>
+        <span class="command">ehab@elfeki:~$ cat ~/get-in-touch</span>
       </div>
       <div class="about-text">
-        /usr/local/bin/docker<br>
-        /usr/local/bin/kubectl<br>
-        /usr/local/bin/terraform<br>
-        /usr/local/bin/helm<br>
-        /usr/local/bin/argocd
+        {{ if eq site.Language.Lang "fr" }}Une question, une opportunité, ou juste envie d'échanger :{{ else }}A question, an opportunity, or just to say hello:{{ end }}<br>
+        <a href="mailto:me@feki.dev">me@feki.dev</a>
       </div>
     </div>
 
