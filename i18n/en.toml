@@ -24,3 +24,9 @@ other = "Quality"
 
 [posts_see_all]
 other = "see all →"
+
+[hire_title]
+other = "hire"
+
+[availability]
+other = "available for work"

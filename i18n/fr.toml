@@ -24,3 +24,9 @@ other = "Qualité"
 
 [posts_see_all]
 other = "voir tout →"
+
+[hire_title]
+other = "prestations"
+
+[availability]
+other = "disponible pour missions"

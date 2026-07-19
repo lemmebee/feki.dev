@@ -1,0 +1,40 @@
+{{ define "main" }}
+{{ partial "terminal_style.html" . }}
+
+<div class="terminal">
+  <div class="terminal-header">
+    <div class="terminal-controls">
+      <a href="{{ site.Home.RelPermalink }}" class="terminal-home-link">{{ i18n "about_home" }}</a>
+    </div>
+    <div class="terminal-title" style="text-align: right;">ehab@elfeki ~ {{ i18n "hire_title" }}</div>
+  </div>
+  <div class="terminal-body">
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ cat ~/hire.md</span>
+      </div>
+      <div class="about-text hire-doc">
+        <p class="hire-status"><span class="status-dot"></span>{{ .Params.status }}</p>
+        {{ .Content }}
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$ cat ~/start-a-project</span>
+      </div>
+      <div class="about-text">
+        {{ .Params.contact_intro }}<br>
+        <a href="mailto:{{ .Params.email }}">{{ .Params.email }}</a>
+      </div>
+    </div>
+
+    <div class="command-block">
+      <div class="prompt">
+        <span class="command">ehab@elfeki:~$</span>
+        <span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</div>
+{{ end }}
