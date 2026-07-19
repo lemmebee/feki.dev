@@ -1,0 +1,39 @@
+{{ define "main" }}
+
+<header>
+    <h1 class="glitch-text">{{ $.Site.Title }}</h1>
+    <p class="availability">
+        <span class="status-dot"></span>{{ i18n "availability" }}
+    </p>
+</header>
+<style>
+.availability {
+    margin: -0.4rem 0 0;
+    font-size: .95rem;
+}
+.availability a {
+    color: inherit;
+}
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #3fb950;
+    display: inline-block;
+    margin-right: 8px;
+    box-shadow: 0 0 0 0 rgba(63, 185, 80, .7);
+    animation: statusPulse 2s infinite;
+}
+@keyframes statusPulse {
+    70% { box-shadow: 0 0 0 7px rgba(63, 185, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .status-dot { animation: none; }
+}
+</style>
+{{ $menu := $.Site.Data.menu }}
+{{ if eq $.Site.Language.Lang "fr" }}{{ $menu = $.Site.Data.menu_fr }}{{ end }}
+{{ partial "menu_item.html" (dict "context" . "collection" $menu.entries) }}
+
+{{ end }}

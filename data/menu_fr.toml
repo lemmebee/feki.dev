@@ -6,6 +6,10 @@ title = "infos"
   url = "fr/about/"
 
   [[entries.entries]]
+  title = "me recruter"
+  url = "fr/hire/"
+
+  [[entries.entries]]
   title = "github"
   url = "https://github.com/lemmebee"
 
